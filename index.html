@@ -154,10 +154,18 @@ async function api(path,opts={}){
   if(!r.ok) throw new Error(await r.text());
   return r.status===204?null:r.json();
 }
+function isTyping(){
+  const a=document.activeElement;
+  return !!(a && (a.tagName==='INPUT'||a.tagName==='SELECT'||a.tagName==='TEXTAREA'));
+}
 async function pull(flash){
   if(CLOUD){
-    try{ items=await api('items?select=*&order=created_at'); setCloud(true);
-         if(!items.length){ await seedCloud(); } }
+    try{ const fresh=await api('items?select=*&order=created_at'); setCloud(true);
+         if(!fresh.length){ await seedCloud(); return; }
+         // не перерисовываем, если ничего не изменилось или юзер печатает
+         if(JSON.stringify(fresh)===JSON.stringify(items)) return;
+         if(isTyping() && !flash) return;
+         items=fresh; }
     catch(e){ setCloud(false,e.message); }
   }else{
     try{ items=JSON.parse(localStorage.getItem(LKEY))||[]; }catch(e){ items=[]; }
@@ -175,7 +183,9 @@ async function addItem(it){
   else{ items.push(it); saveLocal(); }
   render();
 }
+let dirtyUntil=0;
 async function patchItem(id,patch){
+  dirtyUntil=Date.now()+4000;               // не тянуть из облака сразу после правки
   const it=items.find(x=>x.id===id); if(it) Object.assign(it,patch);
   if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(patch)});}catch(e){setCloud(false,e.message);} }
   else saveLocal();
@@ -309,7 +319,13 @@ let fT;function flashBtn(){}
 
 /* старт + периодическая подтяжка из облака */
 pull();
-if(CLOUD) setInterval(()=>{ if(document.visibilityState==='visible' && !imgTarget) pull(); },6000);
+if(CLOUD) setInterval(()=>{
+  if(document.visibilityState!=='visible') return;
+  if(imgTarget) return;                     // идёт выбор фото
+  if(Date.now()<dirtyUntil) return;         // только что правили
+  if(isTyping()) return;                    // юзер печатает
+  pull();
+},6000);
 </script>
 </body>
 </html>
