@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burning Man 2026 — Инвентарь</title>
+<title>Burning Man 2026 — Inventory</title>
 <style>
   :root{
     --bg:#0f0d0b; --panel:#1a1613; --panel2:#221c17; --line:#3a2f24;
@@ -94,13 +94,13 @@
 <body>
 <header>
   <div class="htop">
-    <h1>🔥 Burning Man 2026 · <span>Инвентарь</span></h1>
+    <h1>🔥 Burning Man 2026 · <span>Inventory</span></h1>
     <span class="cloud" id="cloud">…</span>
     <span class="spacer"></span>
     <div class="tools">
-      <button onclick="pull(true)" title="Обновить из облака">↻</button>
-      <button onclick="doExport()">Экспорт</button>
-      <button onclick="doImport()">Импорт</button>
+      <button onclick="pull(true)" title="Refresh from cloud">↻</button>
+      <button onclick="doExport()">Export</button>
+      <button onclick="doImport()">Import</button>
       <button onclick="doCSV()">CSV</button>
     </div>
   </div>
@@ -117,7 +117,7 @@
 <input type="file" id="filejson" accept=".json,application/json" style="display:none">
 
 <script>
-/* ======= CONFIG — общий облачный режим включается вставкой этих двух строк ======= */
+/* ======= CONFIG — shared cloud mode ======= */
 const SUPABASE_URL = "https://lvvxhkfbfeffvjqnustq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dnhoa2ZiZmVmZnZqcW51c3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTQyNjgsImV4cCI6MjEwMDkzMDI2OH0.VdmwLCtF05G03ahKIA_JOY0irdygM7LObYKNyWAzF38";
 /* ================================================================================= */
@@ -126,27 +126,27 @@ const LKEY = 'bm-inv-2026';
 const uid = ()=>Math.random().toString(36).slice(2,10);
 
 const SECTIONS = [
-  {key:'camp', ico:'⛺', lbl:'Лагерь', art:'⛺', tip:'Тень, RV, энергия, вода, быт лагеря'},
-  {key:'bike', ico:'🚲', lbl:'Велик', art:'🚲', tip:'Playa-proof велосипед и свет'},
-  {key:'human',ico:'🧍', lbl:'Человек', art:'🧍', tip:'Экипировка на себе'},
+  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Shade, RV, power, water, camp life'},
+  {key:'bike', ico:'🚲', lbl:'Bike', art:'🚲', tip:'Playa-proof bike and lights'},
+  {key:'human',ico:'🧍', lbl:'Person', art:'🧍', tip:'What you wear and carry'},
 ];
-const STATUS=[['need','нужно'],['bought','куплено'],['packed','упаковано']];
+const STATUS=[['need','need'],['bought','bought'],['packed','packed']];
 
 let view={section:'camp', sub:'day'};
 let items=[];
 
-/* ---------- seed (первый запуск) ---------- */
+/* ---------- seed (first run) ---------- */
 function seed(){
   const mk=(section,sub,name)=>({id:uid(),section,sub:sub||null,name,price:'',url:'',img:'',status:'need'});
-  const L=['Aluminet shade cloth 70–90%','Monkey hut (EMT кондуит 3/4")','Rebar 18–24" + caps/мячики','Ratchet straps','Gaffer tape','EcoFlow/Jackery + соляра','Swamp cooler (evaporative)','Chest cooler','Camp beacon / флаг','Foot bath: таз + уксус','Grey water канистры','Колготки на AC intake RV','Малярная плёнка (щели RV)','Пылевой коврик + веник'];
-  const B=['Круизер б/у (single-speed)','Wax / dry lube (НЕ масляный)','Fat tire / широкая резина','Флаг 2 м уникальный','EL-wire + spoke lights','Запасная камера + патчи','Мини-насос','Мультитул','Кодовый замок','Подстаканник на руль','Корзина + банджи'];
-  const D=['Гогглы (тёмные)','Респиратор / бафф','Camelbak / бутылка','Электролиты','Кружка на карабине','Кокосовое масло','SPF 50','Cooling neck gaiter','Handheld misting fan','Sharpie','Wet wipes + TP','Saline spray в нос','Подарки для gifting'];
-  const N=['Налобник с красным (Nitecore)','Блинки на тело','Тёплый слой / пашмина','Heated vest (USB)','Loop / Eargasm беруши','EL-wire на костюм','Меховая накидка','Powerbank 20k','Фонарик запасной'];
+  const L=['Aluminet shade cloth 70–90%','Monkey hut (3/4" EMT conduit)','Rebar 18–24" + caps','Ratchet straps','Gaffer tape','EcoFlow / Jackery + solar panel','Swamp cooler (evaporative)','Chest cooler','Camp beacon / flag','Foot bath: tub + vinegar','Grey water jugs','Pantyhose over RV A/C intake','Painter\'s plastic (seal RV gaps)','Dust mat + broom'];
+  const B=['Cruiser bike (used, single-speed)','Wax / dry chain lube (never wet lube)','Fat tires / wide rims','6 ft flag, unique pattern','EL-wire + spoke lights','Spare tube + patch kit','Mini pump','Multitool','Combination lock','Handlebar cup holder','Basket + bungee cords'];
+  const D=['Goggles (tinted)','Respirator / buff','Camelbak / water bottle','Electrolytes','Mug on a carabiner','Coconut oil','Sunscreen SPF 50','Cooling neck gaiter','Handheld misting fan','Sharpie','Wet wipes + TP','Saline nasal spray','Gifts for gifting'];
+  const N=['Headlamp with red mode (Nitecore)','Body blinkies','Warm layer / pashmina','Heated vest (USB)','Loop / Eargasm earplugs','EL-wire on costume','Faux fur coat','Power bank 20k','Backup flashlight'];
   return [...L.map(n=>mk('camp',null,n)), ...B.map(n=>mk('bike',null,n)),
           ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n))];
 }
 
-/* ---------- store: облако (Supabase REST) или локально ---------- */
+/* ---------- store: cloud (Supabase REST) or local ---------- */
 async function api(path,opts={}){
   const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers:{
     'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,
@@ -162,7 +162,7 @@ async function pull(flash){
   if(CLOUD){
     try{ const fresh=await api('items?select=*&order=created_at.asc,id.asc'); setCloud(true);
          if(!fresh.length){ await seedCloud(); return; }
-         // не перерисовываем, если ничего не изменилось или юзер печатает
+         // skip re-render if nothing changed or the user is typing
          if(JSON.stringify(fresh)===JSON.stringify(items)) return;
          if(isTyping() && !flash) return;
          items=fresh; }
@@ -185,7 +185,7 @@ async function addItem(it){
 }
 let dirtyUntil=0;
 async function patchItem(id,patch){
-  dirtyUntil=Date.now()+4000;               // не тянуть из облака сразу после правки
+  dirtyUntil=Date.now()+4000;               // pause cloud pull right after an edit
   const it=items.find(x=>x.id===id); if(it) Object.assign(it,patch);
   if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(patch)});}catch(e){setCloud(false,e.message);} }
   else saveLocal();
@@ -199,9 +199,9 @@ async function delItem(id){
 
 function setCloud(on,err){
   const el=document.getElementById('cloud');
-  if(on){ el.textContent='☁ Облако: подключено'; el.className='cloud on'; }
-  else if(CLOUD){ el.textContent='⚠ Облако недоступно'; el.className='cloud off'; el.title=err||''; }
-  else{ el.textContent='📱 Локально (это устройство)'; el.className='cloud off'; }
+  if(on){ el.textContent='☁ Cloud: connected'; el.className='cloud on'; }
+  else if(CLOUD){ el.textContent='⚠ Cloud unavailable'; el.className='cloud off'; el.title=err||''; }
+  else{ el.textContent='📱 Local (this device only)'; el.className='cloud off'; }
 }
 
 /* ---------- render ---------- */
@@ -223,7 +223,7 @@ function render(){
   const sub=document.getElementById('sub'); sub.innerHTML='';
   if(view.section==='human'){
     const wrap=document.createElement('div'); wrap.className='subtabs';
-    [['day','☀️ День'],['night','🌙 Ночь']].forEach(([k,l])=>{
+    [['day','☀️ Day'],['night','🌙 Night']].forEach(([k,l])=>{
       const b=document.createElement('button'); b.dataset.k=k; b.textContent=l;
       if(view.sub===k) b.className='on';
       b.onclick=()=>{view.sub=k;render();}; wrap.appendChild(b);
@@ -236,15 +236,15 @@ function render(){
   const sum=list.reduce((a,i)=>a+money(i.price),0);
   const packed=list.filter(i=>i.status==='packed').length;
   let title=s.lbl, art=s.art, tip=s.tip;
-  if(view.section==='human'){ art=view.sub==='day'?'🧍☀️':'🧍🌙'; title='Человек · '+(view.sub==='day'?'День':'Ночь');
-    tip=view.sub==='day'?'Жара, пыль, солнце — что на себе днём':'Холод и темнота — что на себе ночью'; }
+  if(view.section==='human'){ art=view.sub==='day'?'🧍☀️':'🧍🌙'; title='Person · '+(view.sub==='day'?'Day':'Night');
+    tip=view.sub==='day'?'Heat, dust, sun — what you wear by day':'Cold and dark — what you wear at night'; }
   document.getElementById('banner').innerHTML=
     `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
-     <div class="count"><b>${packed}/${list.length}</b><div>упаковано · $${sum.toFixed(0)}</div></div>`;
+     <div class="count"><b>${packed}/${list.length}</b><div>packed · $${sum.toFixed(0)}</div></div>`;
   // grid
   const grid=document.getElementById('grid'); grid.innerHTML='';
   list.forEach(it=>grid.appendChild(card(it)));
-  const add=document.createElement('div'); add.className='addcard'; add.textContent='+ добавить';
+  const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
   add.onclick=()=>addItem({id:uid(),section:view.section,sub:view.section==='human'?view.sub:null,name:'',price:'',url:'',img:'',status:'need'});
   grid.appendChild(add);
 }
@@ -252,10 +252,10 @@ function card(it){
   const c=document.createElement('div'); c.className='card'+(it.status==='packed'?' done':'');
   const link=it.url?`href="${esc(it.url)}" target="_blank" rel="noopener"`:'';
   c.innerHTML=`
-    <button class="del" title="Удалить" data-del="${it.id}">×</button>
-    <div class="photo" data-img="${it.id}">${it.img?`<img src="${it.img}" alt="">`:`<div class="ph"><b>＋</b>фото</div>`}</div>
+    <button class="del" title="Delete" data-del="${it.id}">×</button>
+    <div class="photo" data-img="${it.id}">${it.img?`<img src="${it.img}" alt="">`:`<div class="ph"><b>＋</b>photo</div>`}</div>
     <div class="cbody">
-      <input class="cname" placeholder="Название" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
+      <input class="cname" placeholder="Item name" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
       <div class="rowline">
         <div class="price"><input placeholder="0" inputmode="decimal" value="${esc(it.price)}" data-f="price" data-id="${it.id}"></div>
         <select class="status" data-s="${it.status}" data-f="status" data-id="${it.id}">
@@ -263,7 +263,7 @@ function card(it){
         </select>
       </div>
       <div class="linkrow">
-        <input placeholder="ссылка" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
+        <input placeholder="link" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
         <a class="openbtn ${it.url?'':'off'}" ${link}>↗</a>
       </div>
     </div>`;
@@ -282,7 +282,7 @@ document.addEventListener('click',e=>{
   const p=e.target.closest('[data-img]'); if(p){ imgTarget=p.dataset.img; document.getElementById('fileimg').click(); }
 });
 
-/* фото */
+/* photo */
 let imgTarget=null;
 document.getElementById('fileimg').addEventListener('change',function(e){
   const f=e.target.files[0]; if(!f||!imgTarget)return; const r=new FileReader();
@@ -296,7 +296,7 @@ document.getElementById('fileimg').addEventListener('change',function(e){
   r.readAsDataURL(f); e.target.value='';
 });
 
-/* экспорт / импорт / csv */
+/* export / import / csv */
 function doExport(){ dl(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}),'burning-man-2026.json'); }
 function doImport(){ document.getElementById('filejson').click(); }
 document.getElementById('filejson').addEventListener('change',function(e){
@@ -304,12 +304,12 @@ document.getElementById('filejson').addEventListener('change',function(e){
   r.onload=async ev=>{ try{ const inc=JSON.parse(ev.target.result); if(!Array.isArray(inc))throw 0;
     for(const it of inc){ const dup=items.find(x=>x.name.trim().toLowerCase()===(it.name||'').trim().toLowerCase() && x.section===it.section && x.sub===(it.sub||null));
       if(!dup) await addItem({id:uid(),section:it.section||'camp',sub:it.sub||null,name:it.name||'',price:it.price||'',url:it.url||'',img:it.img||'',status:it.status||'need'}); }
-    render(); alert('Импортировано ✓'); }catch(err){ alert('Не удалось прочитать файл'); } };
+    render(); alert('Imported ✓'); }catch(err){ alert('Could not read that file'); } };
   r.readAsText(f); e.target.value='';
 });
 function doCSV(){
-  const map=Object.fromEntries(STATUS); const secn={camp:'Лагерь',bike:'Велик',human:'Человек'};
-  let rows=[['Секция','День/Ночь','Название','Цена $','Ссылка','Статус']];
+  const map=Object.fromEntries(STATUS); const secn={camp:'Camp',bike:'Bike',human:'Person'};
+  let rows=[['Section','Day/Night','Item','Price $','Link','Status']];
   items.forEach(i=>rows.push([secn[i.section]||i.section,i.sub||'',i.name,i.price,i.url,map[i.status]||i.status]));
   const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
   dl(new Blob([csv],{type:'text/csv'}),'burning-man-2026.csv');
@@ -317,13 +317,13 @@ function doCSV(){
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 let fT;function flashBtn(){}
 
-/* старт + периодическая подтяжка из облака */
+/* start + periodic cloud refresh */
 pull();
 if(CLOUD) setInterval(()=>{
   if(document.visibilityState!=='visible') return;
-  if(imgTarget) return;                     // идёт выбор фото
-  if(Date.now()<dirtyUntil) return;         // только что правили
-  if(isTyping()) return;                    // юзер печатает
+  if(imgTarget) return;                     // picking a photo
+  if(Date.now()<dirtyUntil) return;         // just edited
+  if(isTyping()) return;                    // user is typing
   pull();
 },6000);
 </script>
