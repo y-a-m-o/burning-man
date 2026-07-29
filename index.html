@@ -160,7 +160,7 @@ function isTyping(){
 }
 async function pull(flash){
   if(CLOUD){
-    try{ const fresh=await api('items?select=*&order=created_at'); setCloud(true);
+    try{ const fresh=await api('items?select=*&order=created_at.asc,id.asc'); setCloud(true);
          if(!fresh.length){ await seedCloud(); return; }
          // не перерисовываем, если ничего не изменилось или юзер печатает
          if(JSON.stringify(fresh)===JSON.stringify(items)) return;
@@ -175,7 +175,7 @@ async function pull(flash){
   render(); if(flash) flashBtn();
 }
 async function seedCloud(){ const rows=seed().map(r=>({...r,created_at:new Date().toISOString()}));
-  await api('items',{method:'POST',body:JSON.stringify(rows)}); items=await api('items?select=*&order=created_at'); }
+  await api('items',{method:'POST',body:JSON.stringify(rows)}); items=await api('items?select=*&order=created_at.asc,id.asc'); }
 function saveLocal(){ try{localStorage.setItem(LKEY,JSON.stringify(items));}catch(e){} }
 
 async function addItem(it){
