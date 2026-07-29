@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burning Man 2026 — Инвентарь</title>
+<style>
+  :root{
+    --bg:#0f0d0b; --panel:#1a1613; --panel2:#221c17; --line:#3a2f24;
+    --text:#f3ece2; --dim:#a89a86; --accent:#e8863c; --accent2:#ffb066;
+    --good:#5fbf7a; --warn:#e8b84b; --danger:#d6604a; --night:#6f8cff;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:radial-gradient(1100px 600px at 72% -12%,#2a2018 0,var(--bg) 55%);min-height:100vh;
+    color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;padding-bottom:90px}
+  header{position:sticky;top:0;z-index:20;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    background:linear-gradient(#0f0d0bee,#0f0d0baa);border-bottom:1px solid var(--line);padding:12px 16px}
+  .htop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  h1{font-size:17px;margin:0;letter-spacing:.3px;white-space:nowrap}
+  h1 span{color:var(--accent)}
+  .cloud{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+  .cloud.on{color:var(--good);border-color:#2f5b3a}
+  .cloud.off{color:var(--warn);border-color:#5b4a2f}
+  .spacer{flex:1}
+  .tools{display:flex;gap:7px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);
+    padding:8px 12px;border-radius:10px;transition:.15s;white-space:nowrap}
+  button:hover{border-color:var(--accent);color:var(--accent2)}
+  button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600}
+  .tools button{padding:7px 10px;font-size:13px}
+
+  /* section nav */
+  nav.sections{display:flex;gap:8px;margin-top:12px}
+  nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s}
+  nav.sections .stab .ico{font-size:24px;line-height:1}
+  nav.sections .stab .lbl{font-size:13px;color:var(--dim)}
+  nav.sections .stab.active{border-color:var(--accent);background:#2a1f14}
+  nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+
+  /* human day/night toggle */
+  .subtabs{display:flex;gap:8px;margin-bottom:14px}
+  .subtabs button{flex:1;padding:10px;border-radius:10px}
+  .subtabs button.on[data-k="day"]{background:linear-gradient(90deg,#e8863c33,#ffb06622);border-color:var(--accent);color:var(--accent2)}
+  .subtabs button.on[data-k="night"]{background:linear-gradient(90deg,#6f8cff22,#6f8cff11);border-color:var(--night);color:#a9bcff}
+
+  .banner{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px 16px;margin-bottom:14px}
+  .banner .art{font-size:40px;line-height:1}
+  .banner .txt b{font-size:16px}
+  .banner .txt div{color:var(--dim);font-size:13px;margin-top:2px}
+  .banner .count{margin-left:auto;text-align:right}
+  .banner .count b{color:var(--accent2);font-size:18px;font-variant-numeric:tabular-nums}
+  .banner .count div{color:var(--dim);font-size:12px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    display:flex;flex-direction:column;position:relative;transition:.15s}
+  .card:hover{border-color:#5a4938}
+  .card.done{opacity:.6}.card.done .photo{filter:grayscale(.5)}
+  .photo{aspect-ratio:4/3;background:#0f0d0b;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;overflow:hidden;border-bottom:1px solid var(--line)}
+  .photo img{width:100%;height:100%;object-fit:cover}
+  .photo .ph{color:var(--dim);font-size:12px;text-align:center}.photo .ph b{display:block;font-size:26px;opacity:.6}
+  .cbody{padding:10px 11px 12px;display:flex;flex-direction:column;gap:7px}
+  .cbody input,.cbody select{background:#0f0d0b;border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:7px 9px;font:inherit;width:100%}
+  .cbody input:focus,.cbody select:focus{outline:none;border-color:var(--accent)}
+  .cname{font-weight:600}
+  .rowline{display:flex;gap:7px}
+  .price{flex:0 0 90px;position:relative}.price input{padding-left:18px;font-variant-numeric:tabular-nums}
+  .price::before{content:"$";position:absolute;left:8px;top:7px;color:var(--dim)}
+  .linkrow{display:flex;gap:6px;align-items:center}.linkrow input{flex:1}
+  .openbtn{padding:7px 10px;text-decoration:none;border:1px solid var(--line);border-radius:8px;color:var(--dim)}
+  .openbtn:hover{border-color:var(--accent);color:var(--accent2)}.openbtn.off{opacity:.35;pointer-events:none}
+  select.status{cursor:pointer}
+  .status[data-s="need"]{color:var(--warn)}.status[data-s="bought"]{color:var(--accent2)}.status[data-s="packed"]{color:var(--good)}
+  .del{position:absolute;top:7px;right:7px;z-index:3;width:26px;height:26px;padding:0;border-radius:50%;
+    background:#0f0d0bcc;border:1px solid var(--line);color:var(--dim);line-height:1;font-size:15px}
+  .del:hover{color:#fff;background:var(--danger);border-color:var(--danger)}
+  .addcard{border:1.5px dashed var(--line);background:transparent;border-radius:12px;display:flex;
+    align-items:center;justify-content:center;min-height:120px;color:var(--dim);cursor:pointer;transition:.15s}
+  .addcard:hover{border-color:var(--accent);color:var(--accent2);background:#221c1755}
+  @media(max-width:520px){.grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}.wrap{padding:12px}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <h1>🔥 Burning Man 2026 · <span>Инвентарь</span></h1>
+    <span class="cloud" id="cloud">…</span>
+    <span class="spacer"></span>
+    <div class="tools">
+      <button onclick="pull(true)" title="Обновить из облака">↻</button>
+      <button onclick="doExport()">Экспорт</button>
+      <button onclick="doImport()">Импорт</button>
+      <button onclick="doCSV()">CSV</button>
+    </div>
+  </div>
+  <nav class="sections" id="nav"></nav>
+</header>
+
+<div class="wrap">
+  <div id="sub"></div>
+  <div class="banner" id="banner"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<input type="file" id="fileimg" accept="image/*" style="display:none">
+<input type="file" id="filejson" accept=".json,application/json" style="display:none">
+
+<script>
+/* ======= CONFIG — общий облачный режим включается вставкой этих двух строк ======= */
+const SUPABASE_URL = "https://lvvxhkfbfeffvjqnustq.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dnhoa2ZiZmVmZnZqcW51c3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTQyNjgsImV4cCI6MjEwMDkzMDI2OH0.VdmwLCtF05G03ahKIA_JOY0irdygM7LObYKNyWAzF38";
+/* ================================================================================= */
+const CLOUD = !!(SUPABASE_URL && SUPABASE_KEY);
+const LKEY = 'bm-inv-2026';
+const uid = ()=>Math.random().toString(36).slice(2,10);
+
+const SECTIONS = [
+  {key:'camp', ico:'⛺', lbl:'Лагерь', art:'⛺', tip:'Тень, RV, энергия, вода, быт лагеря'},
+  {key:'bike', ico:'🚲', lbl:'Велик', art:'🚲', tip:'Playa-proof велосипед и свет'},
+  {key:'human',ico:'🧍', lbl:'Человек', art:'🧍', tip:'Экипировка на себе'},
+];
+const STATUS=[['need','нужно'],['bought','куплено'],['packed','упаковано']];
+
+let view={section:'camp', sub:'day'};
+let items=[];
+
+/* ---------- seed (первый запуск) ---------- */
+function seed(){
+  const mk=(section,sub,name)=>({id:uid(),section,sub:sub||null,name,price:'',url:'',img:'',status:'need'});
+  const L=['Aluminet shade cloth 70–90%','Monkey hut (EMT кондуит 3/4")','Rebar 18–24" + caps/мячики','Ratchet straps','Gaffer tape','EcoFlow/Jackery + соляра','Swamp cooler (evaporative)','Chest cooler','Camp beacon / флаг','Foot bath: таз + уксус','Grey water канистры','Колготки на AC intake RV','Малярная плёнка (щели RV)','Пылевой коврик + веник'];
+  const B=['Круизер б/у (single-speed)','Wax / dry lube (НЕ масляный)','Fat tire / широкая резина','Флаг 2 м уникальный','EL-wire + spoke lights','Запасная камера + патчи','Мини-насос','Мультитул','Кодовый замок','Подстаканник на руль','Корзина + банджи'];
+  const D=['Гогглы (тёмные)','Респиратор / бафф','Camelbak / бутылка','Электролиты','Кружка на карабине','Кокосовое масло','SPF 50','Cooling neck gaiter','Handheld misting fan','Sharpie','Wet wipes + TP','Saline spray в нос','Подарки для gifting'];
+  const N=['Налобник с красным (Nitecore)','Блинки на тело','Тёплый слой / пашмина','Heated vest (USB)','Loop / Eargasm беруши','EL-wire на костюм','Меховая накидка','Powerbank 20k','Фонарик запасной'];
+  return [...L.map(n=>mk('camp',null,n)), ...B.map(n=>mk('bike',null,n)),
+          ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n))];
+}
+
+/* ---------- store: облако (Supabase REST) или локально ---------- */
+async function api(path,opts={}){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers:{
+    'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,
+    'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}});
+  if(!r.ok) throw new Error(await r.text());
+  return r.status===204?null:r.json();
+}
+async function pull(flash){
+  if(CLOUD){
+    try{ items=await api('items?select=*&order=created_at'); setCloud(true);
+         if(!items.length){ await seedCloud(); } }
+    catch(e){ setCloud(false,e.message); }
+  }else{
+    try{ items=JSON.parse(localStorage.getItem(LKEY))||[]; }catch(e){ items=[]; }
+    if(!items.length){ items=seed(); saveLocal(); }
+    setCloud(false);
+  }
+  render(); if(flash) flashBtn();
+}
+async function seedCloud(){ const rows=seed().map(r=>({...r,created_at:new Date().toISOString()}));
+  await api('items',{method:'POST',body:JSON.stringify(rows)}); items=await api('items?select=*&order=created_at'); }
+function saveLocal(){ try{localStorage.setItem(LKEY,JSON.stringify(items));}catch(e){} }
+
+async function addItem(it){
+  if(CLOUD){ const [row]=await api('items',{method:'POST',body:JSON.stringify([{...it,created_at:new Date().toISOString()}])}); items.push(row); }
+  else{ items.push(it); saveLocal(); }
+  render();
+}
+async function patchItem(id,patch){
+  const it=items.find(x=>x.id===id); if(it) Object.assign(it,patch);
+  if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(patch)});}catch(e){setCloud(false,e.message);} }
+  else saveLocal();
+}
+async function delItem(id){
+  items=items.filter(x=>x.id!==id);
+  if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'DELETE'});}catch(e){setCloud(false,e.message);} }
+  else saveLocal();
+  render();
+}
+
+function setCloud(on,err){
+  const el=document.getElementById('cloud');
+  if(on){ el.textContent='☁ Облако: подключено'; el.className='cloud on'; }
+  else if(CLOUD){ el.textContent='⚠ Облако недоступно'; el.className='cloud off'; el.title=err||''; }
+  else{ el.textContent='📱 Локально (это устройство)'; el.className='cloud off'; }
+}
+
+/* ---------- render ---------- */
+function money(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+function currentItems(){
+  return items.filter(i=>i.section===view.section && (view.section!=='human' || i.sub===view.sub));
+}
+function render(){
+  // nav
+  const nav=document.getElementById('nav'); nav.innerHTML='';
+  SECTIONS.forEach(s=>{
+    const cnt=items.filter(i=>i.section===s.key).length;
+    const d=document.createElement('div'); d.className='stab'+(view.section===s.key?' active':'');
+    d.innerHTML=`<span class="ico">${s.ico}</span><span class="lbl">${s.lbl}</span>`;
+    d.onclick=()=>{view.section=s.key;render();};
+    nav.appendChild(d);
+  });
+  // sub (human day/night)
+  const sub=document.getElementById('sub'); sub.innerHTML='';
+  if(view.section==='human'){
+    const wrap=document.createElement('div'); wrap.className='subtabs';
+    [['day','☀️ День'],['night','🌙 Ночь']].forEach(([k,l])=>{
+      const b=document.createElement('button'); b.dataset.k=k; b.textContent=l;
+      if(view.sub===k) b.className='on';
+      b.onclick=()=>{view.sub=k;render();}; wrap.appendChild(b);
+    });
+    sub.appendChild(wrap);
+  }
+  // banner
+  const s=SECTIONS.find(x=>x.key===view.section);
+  const list=currentItems();
+  const sum=list.reduce((a,i)=>a+money(i.price),0);
+  const packed=list.filter(i=>i.status==='packed').length;
+  let title=s.lbl, art=s.art, tip=s.tip;
+  if(view.section==='human'){ art=view.sub==='day'?'🧍☀️':'🧍🌙'; title='Человек · '+(view.sub==='day'?'День':'Ночь');
+    tip=view.sub==='day'?'Жара, пыль, солнце — что на себе днём':'Холод и темнота — что на себе ночью'; }
+  document.getElementById('banner').innerHTML=
+    `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
+     <div class="count"><b>${packed}/${list.length}</b><div>упаковано · $${sum.toFixed(0)}</div></div>`;
+  // grid
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  list.forEach(it=>grid.appendChild(card(it)));
+  const add=document.createElement('div'); add.className='addcard'; add.textContent='+ добавить';
+  add.onclick=()=>addItem({id:uid(),section:view.section,sub:view.section==='human'?view.sub:null,name:'',price:'',url:'',img:'',status:'need'});
+  grid.appendChild(add);
+}
+function card(it){
+  const c=document.createElement('div'); c.className='card'+(it.status==='packed'?' done':'');
+  const link=it.url?`href="${esc(it.url)}" target="_blank" rel="noopener"`:'';
+  c.innerHTML=`
+    <button class="del" title="Удалить" data-del="${it.id}">×</button>
+    <div class="photo" data-img="${it.id}">${it.img?`<img src="${it.img}" alt="">`:`<div class="ph"><b>＋</b>фото</div>`}</div>
+    <div class="cbody">
+      <input class="cname" placeholder="Название" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
+      <div class="rowline">
+        <div class="price"><input placeholder="0" inputmode="decimal" value="${esc(it.price)}" data-f="price" data-id="${it.id}"></div>
+        <select class="status" data-s="${it.status}" data-f="status" data-id="${it.id}">
+          ${STATUS.map(s=>`<option value="${s[0]}" ${it.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="linkrow">
+        <input placeholder="ссылка" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
+        <a class="openbtn ${it.url?'':'off'}" ${link}>↗</a>
+      </div>
+    </div>`;
+  return c;
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+/* events (delegation) */
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset && t.dataset.f){ const patch={[t.dataset.f]:t.value};
+    patchItem(t.dataset.id,patch); if(t.dataset.f==='status'||t.dataset.f==='price'||t.dataset.f==='url') render(); }
+});
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-del]'); if(d){ delItem(d.dataset.del); return; }
+  const p=e.target.closest('[data-img]'); if(p){ imgTarget=p.dataset.img; document.getElementById('fileimg').click(); }
+});
+
+/* фото */
+let imgTarget=null;
+document.getElementById('fileimg').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f||!imgTarget)return; const r=new FileReader();
+  r.onload=ev=>{const img=new Image();img.onload=()=>{
+    const max=360,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=img.width*sc;cv.height=img.height*sc;
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    let data;try{data=cv.toDataURL('image/jpeg',0.72);}catch(err){data=ev.target.result;}
+    patchItem(imgTarget,{img:data}).then(render); imgTarget=null;
+  };img.src=ev.target.result;};
+  r.readAsDataURL(f); e.target.value='';
+});
+
+/* экспорт / импорт / csv */
+function doExport(){ dl(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}),'burning-man-2026.json'); }
+function doImport(){ document.getElementById('filejson').click(); }
+document.getElementById('filejson').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=async ev=>{ try{ const inc=JSON.parse(ev.target.result); if(!Array.isArray(inc))throw 0;
+    for(const it of inc){ const dup=items.find(x=>x.name.trim().toLowerCase()===(it.name||'').trim().toLowerCase() && x.section===it.section && x.sub===(it.sub||null));
+      if(!dup) await addItem({id:uid(),section:it.section||'camp',sub:it.sub||null,name:it.name||'',price:it.price||'',url:it.url||'',img:it.img||'',status:it.status||'need'}); }
+    render(); alert('Импортировано ✓'); }catch(err){ alert('Не удалось прочитать файл'); } };
+  r.readAsText(f); e.target.value='';
+});
+function doCSV(){
+  const map=Object.fromEntries(STATUS); const secn={camp:'Лагерь',bike:'Велик',human:'Человек'};
+  let rows=[['Секция','День/Ночь','Название','Цена $','Ссылка','Статус']];
+  items.forEach(i=>rows.push([secn[i.section]||i.section,i.sub||'',i.name,i.price,i.url,map[i.status]||i.status]));
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  dl(new Blob([csv],{type:'text/csv'}),'burning-man-2026.csv');
+}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+let fT;function flashBtn(){}
+
+/* старт + периодическая подтяжка из облака */
+pull();
+if(CLOUD) setInterval(()=>{ if(document.visibilityState==='visible' && !imgTarget) pull(); },6000);
+</script>
+</body>
+</html>
