@@ -15,7 +15,8 @@
   html,body{margin:0}
   body{background:radial-gradient(1100px 600px at 72% -12%,#2a2018 0,var(--bg) 55%);min-height:100vh;
     color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased;padding-bottom:90px}
+    -webkit-font-smoothing:antialiased;padding-bottom:96px}
+  body.editing{padding-bottom:110px}
   header{position:sticky;top:0;z-index:20;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
     background:linear-gradient(#0f0d0bee,#0f0d0baa);border-bottom:1px solid var(--line);padding:12px 16px}
   .htop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -25,15 +26,17 @@
   .cloud.on{color:var(--good);border-color:#2f5b3a}
   .cloud.off{color:var(--warn);border-color:#5b4a2f}
   .spacer{flex:1}
-  .tools{display:flex;gap:7px;flex-wrap:wrap}
   button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);
     padding:8px 12px;border-radius:10px;transition:.15s;white-space:nowrap}
   button:hover{border-color:var(--accent);color:var(--accent2)}
-  button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  button.primary{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600}
-  .tools button{padding:7px 10px;font-size:13px}
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .editbtn{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600;padding:9px 18px;font-size:14px}
+  .editbtn:hover{background:var(--accent2);color:#1a0f06}
+  .editbtn.on{background:var(--good);border-color:var(--good)}
+  .tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .tools button{padding:6px 10px;font-size:12.5px}
+  .tip{color:var(--dim);font-size:12px;margin:8px 0 0}
 
-  /* section nav */
   nav.sections{display:flex;gap:8px;margin-top:12px}
   nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;
     background:var(--panel2);border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s}
@@ -43,8 +46,6 @@
   nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
 
   .wrap{max-width:1100px;margin:0 auto;padding:16px}
-
-  /* human day/night toggle */
   .subtabs{display:flex;gap:8px;margin-bottom:14px}
   .subtabs button{flex:1;padding:10px;border-radius:10px}
   .subtabs button.on{border-color:var(--accent);color:var(--accent2);background:#2a1f14}
@@ -62,52 +63,92 @@
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;align-items:start}
   .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
-    display:flex;flex-direction:column;position:relative;transition:.15s}
+    display:flex;flex-direction:column;position:relative;transition:border-color .15s,opacity .15s}
   .card:hover{border-color:#5a4938}
   .card.done{opacity:.72}.card.done .photo{filter:grayscale(.35)}
+  .card.buyable{cursor:pointer}
+  .card.dragging{opacity:.45;border-color:var(--accent)}
+  .card.dragover{border-color:var(--accent2)}
+
   .photo{aspect-ratio:16/10;background:#0f0d0b;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;overflow:hidden;border-bottom:1px solid var(--line)}
+    overflow:hidden;border-bottom:1px solid var(--line)}
   .photo img{width:100%;height:100%;object-fit:cover}
   .photo.empty{background:#13100d}
-  .photo.empty:hover{background:#1a1511}
   .photo .ph{color:var(--dim);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
   .photo .ph b{font-size:26px;opacity:.6;font-weight:400;line-height:1}
-  .cbody{padding:8px 8px 9px;display:flex;flex-direction:column;gap:5px}
-  .cbody input,.cbody select{background:#0f0d0b;border:1px solid var(--line);color:var(--text);
-    border-radius:7px;padding:5px 7px;font:inherit;font-size:13px;width:100%;min-width:0}
-  .cbody input:focus,.cbody select:focus{outline:none;border-color:var(--accent)}
-  .cname{font-weight:600;font-size:13.5px}
+
+  /* ---- вид просмотра ---- */
+  .vbody{padding:9px 10px 8px;display:flex;flex-direction:column;gap:6px}
+  .vname{font-weight:600;font-size:13.5px;line-height:1.25}
+  .vrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .vprice{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+  .vqty{font-size:12px;color:var(--accent2);border:1px solid var(--accent);border-radius:20px;padding:1px 7px}
+  .pill{font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid;margin-left:auto}
+  .pill.need{color:var(--warn);border-color:#5b4a2f}
+  .pill.maybe{color:var(--maybe);border-color:#4a3a63}
+  .pill.bought{color:var(--good);border-color:#2f5b3a}
+  .cfoot{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding:6px 8px}
+  .cbtn{flex:1;padding:5px 8px;font-size:12px;border-radius:8px;color:var(--dim);background:transparent}
+  .cbtn:hover{color:var(--accent2);border-color:var(--accent)}
+  .cbtn.has{color:var(--accent2);border-color:#5a4938}
+  .shop{font-size:11px;color:var(--dim);white-space:nowrap;padding:0 4px}
+
+  /* ---- вид правки ---- */
+  .grip{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px;cursor:grab;
+    background:#191410;border-bottom:1px solid var(--line);color:var(--dim);font-size:12px;touch-action:none}
+  .grip:active{cursor:grabbing}
+  .ebody{padding:8px;display:flex;flex-direction:column;gap:6px}
+  .ebody input,.ebody select{background:#0f0d0b;border:1px solid var(--line);color:var(--text);
+    border-radius:7px;padding:6px 8px;font:inherit;font-size:13px;width:100%;min-width:0}
+  .ebody input:focus,.ebody select:focus{outline:none;border-color:var(--accent)}
+  .ename{font-weight:600}
   .rowline{display:flex;gap:5px;flex-wrap:wrap}
   .price{flex:1 1 56px;position:relative}.price input{padding-left:15px;font-variant-numeric:tabular-nums}
-  .price::before{content:"$";position:absolute;left:6px;top:5px;color:var(--dim);font-size:13px}
-  .qty{flex:0 0 46px;position:relative}
+  .price::before{content:"$";position:absolute;left:6px;top:6px;color:var(--dim);font-size:13px}
+  .qty{flex:0 0 48px;position:relative}
   .qty input{padding-left:15px;font-variant-numeric:tabular-nums}
-  .qty::before{content:"×";position:absolute;left:6px;top:5px;color:var(--dim);font-size:13px}
-  .status{flex:0 0 76px;padding-right:2px}
-  .qbadge{position:absolute;top:5px;left:5px;z-index:3;background:#0f0d0bcc;border:1px solid var(--accent);
-    color:var(--accent2);border-radius:20px;padding:2px 8px;font-size:12px;font-weight:600;
-    font-variant-numeric:tabular-nums;line-height:1.3}
-  .linkrow{display:flex;gap:5px;align-items:center}.linkrow input{flex:1 1 40px}
-  .openbtn{padding:5px 8px;font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:7px;color:var(--dim);flex:0 0 auto}
-  .openbtn:hover{border-color:var(--accent);color:var(--accent2)}.openbtn.off{opacity:.35;pointer-events:none}
-  select.status{cursor:pointer}
-  .status[data-s="need"]{color:var(--warn);border-color:#5b4a2f}
-  .status[data-s="maybe"]{color:var(--maybe);border-color:#4a3a63}
-  .status[data-s="bought"]{color:var(--good);border-color:#2f5b3a}
-  .del{position:absolute;top:5px;right:5px;z-index:3;width:22px;height:22px;font-size:13px;padding:0;border-radius:50%;
-    background:#0f0d0bcc;border:1px solid var(--line);color:var(--dim);line-height:1;font-size:15px}
-  .del:hover{color:#fff;background:var(--danger);border-color:var(--danger)}
-  .del.arm{width:auto;height:22px;padding:0 9px;border-radius:20px;background:var(--danger);
-    color:#fff;border-color:var(--danger);font-size:11px;font-weight:600;letter-spacing:.01em}
+  .qty::before{content:"×";position:absolute;left:6px;top:6px;color:var(--dim);font-size:13px}
+  .delbtn{width:100%;padding:6px;font-size:12.5px;color:var(--danger);border-color:#5b332c;background:transparent}
+  .delbtn:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
   .addcard{border:1.5px dashed var(--line);background:transparent;border-radius:12px;display:flex;
-    align-items:center;justify-content:center;min-height:64px;color:var(--dim);font-size:13px;cursor:pointer;transition:.15s}
+    align-items:center;justify-content:center;min-height:64px;color:var(--dim);font-size:13px;cursor:pointer}
   .addcard:hover{border-color:var(--accent);color:var(--accent2);background:#221c1755}
-  @media(max-width:520px){.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.wrap{padding:10px}}
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;display:flex;
+
+  .donebar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(#0f0d0b00,#0f0d0bee 22%);display:flex;justify-content:center}
+  .donebar button{background:var(--good);border-color:var(--good);color:#0d1a10;font-weight:600;
+    padding:12px 30px;font-size:15px;border-radius:12px;box-shadow:0 8px 24px #0009}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:60;display:flex;
     align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);
     border-radius:12px;padding:10px 12px 10px 14px;box-shadow:0 10px 28px #000a;max-width:92vw}
-  .toast span{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toast span{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .toast button{padding:6px 12px;font-size:13px;border-color:var(--accent);color:var(--accent2)}
+
+  /* ---- комментарии ---- */
+  .sheetbg{position:fixed;inset:0;z-index:70;background:#0a0806cc;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+    display:flex;align-items:flex-end;justify-content:center}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px 16px 0 0;width:100%;
+    max-width:640px;max-height:86vh;display:flex;flex-direction:column}
+  @media(min-width:640px){.sheetbg{align-items:center}.sheet{border-radius:16px;max-height:80vh}}
+  .shead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .shead b{font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .shead button{padding:6px 10px}
+  .slist{overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;flex:1;min-height:80px}
+  .cmt{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .cmt .who{font-size:11.5px;color:var(--accent2);margin-bottom:3px}
+  .cmt .who i{color:var(--dim);font-style:normal;margin-left:6px}
+  .cmt .body{font-size:14px;white-space:pre-wrap;word-break:break-word}
+  .empty-note{color:var(--dim);font-size:13px;text-align:center;padding:18px 0}
+  .sfoot{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;align-items:flex-end}
+  .sfoot textarea{flex:1;background:#0f0d0b;border:1px solid var(--line);color:var(--text);border-radius:10px;
+    padding:9px 11px;font:inherit;font-size:14px;resize:none;min-height:42px;max-height:120px}
+  .sfoot textarea:focus{outline:none;border-color:var(--accent)}
+  .sfoot button{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600;padding:10px 16px}
+  .whoami{padding:0 16px 10px;color:var(--dim);font-size:12px}
+  .whoami button{padding:3px 9px;font-size:11.5px;margin-left:6px}
+
+  @media(max-width:520px){.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.wrap{padding:10px}}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -117,13 +158,9 @@
     <h1>🔥 Burning Man 2026 · <span>Inventory</span></h1>
     <span class="cloud" id="cloud">…</span>
     <span class="spacer"></span>
-    <div class="tools">
-      <button onclick="pull(true)" title="Refresh from cloud">↻</button>
-      <button onclick="doExport()">Export</button>
-      <button onclick="doImport()">Import</button>
-      <button onclick="doCSV()">CSV</button>
-    </div>
+    <button class="editbtn" id="editbtn" onclick="toggleMode()">✏️ Edit</button>
   </div>
+  <div id="tools"></div>
   <nav class="sections" id="nav"></nav>
 </header>
 
@@ -133,22 +170,25 @@
   <div class="grid" id="grid"></div>
 </div>
 
+<div id="donebar"></div>
+<div id="sheet"></div>
+
 <input type="file" id="fileimg" accept="image/*" style="display:none">
 <input type="file" id="filejson" accept=".json,application/json" style="display:none">
 
 <script>
-/* ======= CONFIG — shared cloud mode ======= */
+/* ======= CONFIG ======= */
 const SUPABASE_URL = "https://lvvxhkfbfeffvjqnustq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dnhoa2ZiZmVmZnZqcW51c3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTQyNjgsImV4cCI6MjEwMDkzMDI2OH0.VdmwLCtF05G03ahKIA_JOY0irdygM7LObYKNyWAzF38";
-/* ================================================================================= */
+/* ====================== */
 const CLOUD = !!(SUPABASE_URL && SUPABASE_KEY);
-const LKEY = 'bm-inv-2026';
-const uid = ()=>Math.random().toString(36).slice(2,10);
+const LKEY='bm-inv-2026', NKEY='bm-user-name';
+const uid=()=>Math.random().toString(36).slice(2,10);
 
-const SECTIONS = [
+const SECTIONS=[
   {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Shade, RV, power, water, camp life'},
   {key:'bike', ico:'🚲', lbl:'Bike', art:'🚲', tip:'Playa-proof bike and lights'},
-  {key:'human',ico:'🧍', lbl:'Man', art:'🧍', tip:'What you wear and carry', subs:[
+  {key:'human',ico:'🧍', lbl:'Man',  art:'🧍', tip:'What you wear and carry', subs:[
     {key:'day',   lbl:'☀️ Day',   art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
     {key:'night', lbl:'🌙 Night', art:'🌙', tip:'Cold and dark — what you wear at night'},
   ]},
@@ -159,14 +199,15 @@ const SECTIONS = [
   ]},
 ];
 const STATUS=[['need','need'],['maybe','maybe'],['bought','bought']];
-let HAS_QTY=false;   // включается сам, когда в базе появится колонка qty
-
-const subOf=s=>(s&&s.subs)?s.subs:null;
 const secOf=k=>SECTIONS.find(x=>x.key===k);
-let view={section:'camp', subs:{human:'day', food:'produce'}};
-let items=[];
+const subOf=s=>(s&&s.subs)?s.subs:null;
 
-/* ---------- seed (first run) ---------- */
+let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false;
+let mode='view';
+let view={section:'camp', subs:{human:'day', food:'produce'}};
+let items=[], cCount={};
+
+/* ---------- seed ---------- */
 function seed(){
   const mk=(section,sub,name)=>({id:uid(),section,sub:sub||null,name,price:'',url:'',img:'',status:'need',qty:'1'});
   const L=['Aluminet shade cloth 70–90%','Monkey hut (3/4" EMT conduit)','Rebar 18–24" + caps','Ratchet straps','Gaffer tape','EcoFlow / Jackery + solar panel','Swamp cooler (evaporative)','Chest cooler','Camp beacon / flag','Foot bath: tub + vinegar','Grey water jugs','Pantyhose over RV A/C intake','Painter\'s plastic (seal RV gaps)','Dust mat + broom'];
@@ -178,11 +219,10 @@ function seed(){
   const A=['Beer — cans only, no glass','Whiskey','Tequila / mezcal','Vodka','Boxed white wine','Prosecco (sunrise)','Aperol + vermouth','Bitters','Mixers: tonic + soda','Bar kit: shaker, jigger, opener','Reusable shot cups'];
   return [...L.map(n=>mk('camp',null,n)), ...B.map(n=>mk('bike',null,n)),
           ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n)),
-          ...P.map(n=>mk('food','produce',n)), ...V.map(n=>mk('food','beverage',n)),
-          ...A.map(n=>mk('food','alcohol',n))];
+          ...P.map(n=>mk('food','produce',n)), ...V.map(n=>mk('food','beverage',n)), ...A.map(n=>mk('food','alcohol',n))];
 }
 
-/* ---------- store: cloud (Supabase REST) or local ---------- */
+/* ---------- store ---------- */
 async function api(path,opts={}){
   const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers:{
     'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,
@@ -190,53 +230,76 @@ async function api(path,opts={}){
   if(!r.ok) throw new Error(await r.text());
   return r.status===204?null:r.json();
 }
-function isTyping(){
-  const a=document.activeElement;
-  return !!(a && (a.tagName==='INPUT'||a.tagName==='SELECT'||a.tagName==='TEXTAREA'));
+function isTyping(){const a=document.activeElement;
+  return !!(a&&(a.tagName==='INPUT'||a.tagName==='SELECT'||a.tagName==='TEXTAREA'));}
+function sortKey(it){
+  const s=(it.sort===null||it.sort===undefined||it.sort==='')?null:Number(it.sort);
+  if(s!==null && !isNaN(s)) return s;
+  return it.created_at?Date.parse(it.created_at)/1000:0;
 }
-async function pull(flash){
+function sortItems(a){ return a.slice().sort((x,y)=>sortKey(x)-sortKey(y)); }
+
+async function pull(force){
   if(CLOUD){
-    try{ const fresh=await api('items?select=*&order=created_at.asc,id.asc'); setCloud(true);
-         if(fresh.length) HAS_QTY = Object.prototype.hasOwnProperty.call(fresh[0],'qty');
-         if(!fresh.length){ await seedCloud(); return; }
-         // skip re-render if nothing changed or the user is typing
-         if(JSON.stringify(fresh)===JSON.stringify(items)) return;
-         if(isTyping() && !flash) return;
-         items=fresh; }
-    catch(e){ setCloud(false,e.message); }
+    try{
+      const fresh=await api('items?select=*&order=created_at.asc,id.asc'); setCloud(true);
+      if(fresh.length){
+        HAS_QTY=Object.prototype.hasOwnProperty.call(fresh[0],'qty');
+        HAS_SORT=Object.prototype.hasOwnProperty.call(fresh[0],'sort');
+      }
+      if(!fresh.length){ await seedCloud(); return; }
+      const sorted=sortItems(fresh);
+      if(JSON.stringify(sorted)===JSON.stringify(items)) { await loadCounts(); return; }
+      if((isTyping()||dragEl) && !force) return;
+      items=sorted;
+    }catch(e){ setCloud(false,e.message); }
+    await loadCounts();
   }else{
     try{ items=JSON.parse(localStorage.getItem(LKEY))||[]; }catch(e){ items=[]; }
     if(!items.length){ items=seed(); saveLocal(); }
     setCloud(false);
   }
-  render(); if(flash) flashBtn();
+  render();
 }
-async function seedCloud(){ const rows=seed().map(r=>({...r,created_at:new Date().toISOString()}));
-  await api('items',{method:'POST',body:JSON.stringify(rows)}); items=await api('items?select=*&order=created_at.asc,id.asc'); }
+async function loadCounts(){
+  if(!CLOUD) return;
+  try{
+    const rows=await api('comments?select=item_id');
+    HAS_COMMENTS=true; cCount={};
+    rows.forEach(r=>{cCount[r.item_id]=(cCount[r.item_id]||0)+1;});
+  }catch(e){ HAS_COMMENTS=false; }
+}
+async function seedCloud(){
+  const rows=seed().map((r,i)=>({...r,created_at:new Date(Date.now()+i*1000).toISOString()}));
+  await api('items',{method:'POST',body:JSON.stringify(rows)});
+  items=sortItems(await api('items?select=*'));
+}
 function saveLocal(){ try{localStorage.setItem(LKEY,JSON.stringify(items));}catch(e){} }
 
+let dirtyUntil=0;
 async function addItem(it){
+  dirtyUntil=Date.now()+4000;
   if(CLOUD){ const [row]=await api('items',{method:'POST',body:JSON.stringify([{...it,created_at:new Date().toISOString()}])}); items.push(row); }
   else{ items.push(it); saveLocal(); }
   render();
 }
-let dirtyUntil=0;
 async function patchItem(id,patch){
   if(!HAS_QTY && 'qty' in patch) delete patch.qty;
+  if(!HAS_SORT && 'sort' in patch) delete patch.sort;
   if(!Object.keys(patch).length) return;
-  dirtyUntil=Date.now()+4000;               // pause cloud pull right after an edit
+  dirtyUntil=Date.now()+4000;
   const it=items.find(x=>x.id===id); if(it) Object.assign(it,patch);
-  if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(patch)});}catch(e){setCloud(false,e.message);} }
+  if(CLOUD){ try{ await api('items?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(patch)}); }
+             catch(e){ setCloud(false,e.message); } }
   else saveLocal();
 }
 async function delItem(id){
   dirtyUntil=Date.now()+4000;
   items=items.filter(x=>x.id!==id);
-  if(CLOUD){ try{await api('items?id=eq.'+encodeURIComponent(id),{method:'DELETE'});}catch(e){setCloud(false,e.message);} }
+  if(CLOUD){ try{ await api('items?id=eq.'+encodeURIComponent(id),{method:'DELETE'}); }catch(e){ setCloud(false,e.message); } }
   else saveLocal();
   render();
 }
-
 function setCloud(on,err){
   const el=document.getElementById('cloud');
   if(on){ el.textContent='☁ Cloud: connected'; el.className='cloud on'; }
@@ -244,33 +307,50 @@ function setCloud(on,err){
   else{ el.textContent='📱 Local (this device only)'; el.className='cloud off'; }
 }
 
-/* ---------- render ---------- */
+/* ---------- helpers ---------- */
 function money(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 function qnum(it){const n=parseInt(it.qty,10);return (isNaN(n)||n<1)?1:n;}
-function curSub(){                      // активный подраздел текущей секции (или null)
-  const subs=subOf(secOf(view.section));
-  if(!subs) return null;
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function curSub(){
+  const subs=subOf(secOf(view.section)); if(!subs) return null;
   if(!subs.some(x=>x.key===view.subs[view.section])) view.subs[view.section]=subs[0].key;
   return view.subs[view.section];
 }
 function currentItems(){
   const sub=curSub();
-  return items.filter(i=>i.section===view.section && (sub===null || i.sub===sub));
+  return items.filter(i=>i.section===view.section && (sub===null||i.sub===sub));
 }
+
+/* ---------- mode ---------- */
+function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
+
+/* ---------- render ---------- */
 function render(){
-  // nav
+  document.body.classList.toggle('editing', mode==='edit');
+  const eb=document.getElementById('editbtn');
+  eb.textContent = mode==='edit' ? '✓ Done' : '✏️ Edit';
+  eb.className = 'editbtn'+(mode==='edit'?' on':'');
+
+  const tools=document.getElementById('tools');
+  tools.innerHTML = mode==='edit'
+    ? `<div class="tools">
+         <button onclick="pull(true)">↻ Refresh</button>
+         <button onclick="doExport()">Export</button>
+         <button onclick="doImport()">Import</button>
+         <button onclick="doCSV()">CSV</button>
+       </div>
+       <p class="tip">${HAS_SORT?'Drag the ⠿ handle to reorder. ':''}Tap a photo to change it.</p>`
+    : '';
+
   const nav=document.getElementById('nav'); nav.innerHTML='';
   SECTIONS.forEach(s=>{
-    const cnt=items.filter(i=>i.section===s.key).length;
     const d=document.createElement('div'); d.className='stab'+(view.section===s.key?' active':'');
     d.innerHTML=`<span class="ico">${s.ico}</span><span class="lbl">${s.lbl}</span>`;
     d.onclick=()=>{view.section=s.key;render();};
     nav.appendChild(d);
   });
-  // подразделы секции (если есть)
-  const s=secOf(view.section);
-  const subs=subOf(s);
-  const activeSub=curSub();
+
+  const s=secOf(view.section), subs=subOf(s), activeSub=curSub();
   const sub=document.getElementById('sub'); sub.innerHTML='';
   if(subs){
     const wrap=document.createElement('div'); wrap.className='subtabs';
@@ -281,105 +361,137 @@ function render(){
     });
     sub.appendChild(wrap);
   }
-  // banner
+
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
-  const packed=list.filter(i=>i.status==='bought').length;
+  const bought=list.filter(i=>i.status==='bought').length;
   let title=s.lbl, art=s.art, tip=s.tip;
-  if(subs){
-    const sb=subs.find(x=>x.key===activeSub);
-    if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); }
-  }
+  if(subs){ const sb=subs.find(x=>x.key===activeSub);
+    if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); } }
   document.getElementById('banner').innerHTML=
     `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
-     <div class="count"><b>${packed}/${list.length}</b><div>bought · total $${sum.toFixed(0)}</div></div>`;
-  // grid
+     <div class="count"><b>${bought}/${list.length}</b><div>bought · total $${sum.toFixed(0)}</div></div>`;
+
   const grid=document.getElementById('grid'); grid.innerHTML='';
-  list.forEach(it=>grid.appendChild(card(it)));
-  const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
-  add.onclick=()=>{const n={id:uid(),section:view.section,sub:curSub(),name:'',price:'',url:'',img:'',status:'need'}; if(HAS_QTY)n.qty='1'; addItem(n);};
-  grid.appendChild(add);
+  list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
+  if(mode==='edit'){
+    const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
+    add.onclick=()=>{const n={id:uid(),section:view.section,sub:curSub(),name:'',price:'',url:'',img:'',status:'need'};
+      if(HAS_QTY)n.qty='1'; if(HAS_SORT)n.sort=Date.now()/1000; addItem(n);};
+    grid.appendChild(add);
+  }
+
+  document.getElementById('donebar').innerHTML = mode==='edit'
+    ? `<div class="donebar"><button onclick="toggleMode()">✓ Done editing</button></div>` : '';
 }
-function card(it){
-  const c=document.createElement('div'); c.className='card'+(it.status==='bought'?' done':'');
-  const link=it.url?`href="${esc(it.url)}" target="_blank" rel="noopener"`:'';
-  const q=qnum(it);
+
+function photoHTML(it){
+  return it.img ? `<div class="photo"><img src="${it.img}" alt=""></div>`
+                : `<div class="photo empty"><div class="ph"><b>＋</b>photo</div></div>`;
+}
+
+function viewCard(it){
+  const c=document.createElement('div');
+  const q=qnum(it), n=cCount[it.id]||0;
+  c.className='card'+(it.status==='bought'?' done':'')+(it.url?' buyable':'');
   c.innerHTML=`
-    <button class="del" title="Delete" data-del="${it.id}">×</button>
-    ${q>1?`<span class="qbadge">×${q}</span>`:''}
-    <div class="photo${it.img?'':' empty'}" data-img="${it.id}">${it.img?`<img src="${it.img}" alt="">`:`<div class="ph"><b>＋</b>photo</div>`}</div>
-    <div class="cbody">
-      <input class="cname" placeholder="Item name" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
+    ${photoHTML(it)}
+    <div class="vbody">
+      <div class="vname">${esc(it.name)||'<span style="color:var(--dim)">untitled</span>'}</div>
+      <div class="vrow">
+        ${it.price?`<span class="vprice">$${esc(it.price)}</span>`:'<span class="vprice" style="color:var(--dim)">—</span>'}
+        ${q>1?`<span class="vqty">×${q}</span>`:''}
+        <span class="pill ${it.status}">${it.status}</span>
+      </div>
+    </div>
+    <div class="cfoot">
+      ${HAS_COMMENTS?`<button class="cbtn${n?' has':''}" data-cmt="${it.id}">💬 ${n||'note'}</button>`:''}
+      ${it.url?'<span class="shop">open ↗</span>':''}
+    </div>`;
+  if(it.url) c.addEventListener('click',e=>{
+    if(e.target.closest('[data-cmt]')) return;
+    window.open(it.url,'_blank','noopener');
+  });
+  return c;
+}
+
+function editCard(it){
+  const c=document.createElement('div'); c.className='card'; c.dataset.id=it.id;
+  c.innerHTML=`
+    ${HAS_SORT?`<div class="grip" data-grip="${it.id}">⠿ drag</div>`:''}
+    <div data-img="${it.id}" style="cursor:pointer">${photoHTML(it)}</div>
+    <div class="ebody">
+      <input class="ename" placeholder="Item name" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
       <div class="rowline">
         <div class="price"><input placeholder="0" inputmode="decimal" value="${esc(it.price)}" data-f="price" data-id="${it.id}"></div>
         ${HAS_QTY?`<div class="qty"><input placeholder="1" inputmode="numeric" value="${esc(it.qty==null||it.qty==='1'?'':it.qty)}" data-f="qty" data-id="${it.id}"></div>`:''}
       </div>
-      <div class="linkrow">
-        <select class="status" data-s="${it.status}" data-f="status" data-id="${it.id}">
-          ${STATUS.map(s=>`<option value="${s[0]}" ${it.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}
-        </select>
-        <input placeholder="link" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
-        ${it.url?`<a class="openbtn" ${link}>↗</a>`:''}
-      </div>
+      <select data-f="status" data-id="${it.id}">
+        ${STATUS.map(s=>`<option value="${s[0]}" ${it.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}
+      </select>
+      <input placeholder="link" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
+      <button class="delbtn" data-del="${it.id}">Delete</button>
     </div>`;
   return c;
 }
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
-/* ---------- delete with confirmation + undo ---------- */
-let undoItem=null, undoTimer=null;
-function askDelete(id,btn){
-  const it=items.find(x=>x.id===id); if(!it) return;
-  const label=(it.name||'').trim() || 'this item';
-  if(btn && btn.dataset.armed!=='1'){          // первый тап — только предупреждение
-    btn.dataset.armed='1'; btn.classList.add('arm'); btn.textContent='delete?';
-    clearTimeout(btn._t);
-    btn._t=setTimeout(()=>{ if(btn.isConnected){ btn.dataset.armed=''; btn.classList.remove('arm'); btn.textContent='×'; } },4000);
-    return;
-  }
-  if(btn) clearTimeout(btn._t);               // второй тап — удаляем
-  undoItem=Object.assign({},it);
-  delItem(id);
-  showUndo(label);
-}
-function showUndo(label){
-  hideUndo(true);
-  const t=document.createElement('div'); t.className='toast'; t.id='toast';
-  t.innerHTML='<span>Deleted “'+esc(label)+'”</span><button type="button" id="undobtn">Undo</button>';
-  document.body.appendChild(t);
-  document.getElementById('undobtn').onclick=undoDelete;
-  undoTimer=setTimeout(()=>{ undoItem=null; hideUndo(); },12000);
-}
-function hideUndo(keepItem){
-  clearTimeout(undoTimer);
-  const t=document.getElementById('toast'); if(t) t.remove();
-  if(!keepItem) undoItem=null;
-}
-async function undoDelete(){
-  const it=undoItem; hideUndo(); if(!it) return;
-  dirtyUntil=Date.now()+4000;
-  if(CLOUD){ try{ await api('items',{method:'POST',body:JSON.stringify([it])}); }
-             catch(e){ setCloud(false,e.message); } }
-  items.push(it);
-  if(!CLOUD) saveLocal();
-  if(CLOUD) await pull(true); else render();
-}
-
-/* events (delegation) */
+/* ---------- events ---------- */
 document.addEventListener('change',e=>{
   const t=e.target;
-  if(t.dataset && t.dataset.f){ const patch={[t.dataset.f]:t.value};
-    patchItem(t.dataset.id,patch); if(t.dataset.f==='status'||t.dataset.f==='price'||t.dataset.f==='url') render(); }
+  if(t.dataset&&t.dataset.f){
+    patchItem(t.dataset.id,{[t.dataset.f]:t.value});
+    if(t.dataset.f!=='name'&&t.dataset.f!=='url') render();
+  }
 });
 document.addEventListener('click',e=>{
-  const d=e.target.closest('[data-del]'); if(d){ askDelete(d.dataset.del,d); return; }
-  const p=e.target.closest('[data-img]'); if(p){ imgTarget=p.dataset.img; document.getElementById('fileimg').click(); }
+  const cm=e.target.closest('[data-cmt]'); if(cm){ e.stopPropagation(); openComments(cm.dataset.cmt); return; }
+  const d=e.target.closest('[data-del]'); if(d){ askDelete(d.dataset.del); return; }
+  const p=e.target.closest('[data-img]'); if(p && mode==='edit'){ imgTarget=p.dataset.img; document.getElementById('fileimg').click(); }
 });
 
-/* photo */
+/* ---------- drag to reorder ---------- */
+let dragEl=null, dragId=null;
+document.addEventListener('pointerdown',e=>{
+  const g=e.target.closest('[data-grip]'); if(!g||mode!=='edit') return;
+  e.preventDefault();
+  dragId=g.dataset.grip; dragEl=g.closest('.card'); dragEl.classList.add('dragging');
+  g.setPointerCapture(e.pointerId);
+});
+document.addEventListener('pointermove',e=>{
+  if(!dragEl) return;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const over=el&&el.closest('.card');
+  if(!over||over===dragEl||!over.dataset.id) return;
+  const r=over.getBoundingClientRect();
+  const after=(e.clientY-r.top)>r.height/2;
+  over.parentNode.insertBefore(dragEl, after?over.nextSibling:over);
+});
+document.addEventListener('pointerup',async()=>{
+  if(!dragEl) return;
+  const el=dragEl; dragEl=null; el.classList.remove('dragging');
+  const ids=[...document.querySelectorAll('#grid .card')].map(c=>c.dataset.id).filter(Boolean);
+  const idx=ids.indexOf(dragId); if(idx<0) return;
+  const prev=idx>0?items.find(x=>x.id===ids[idx-1]):null;
+  const next=idx<ids.length-1?items.find(x=>x.id===ids[idx+1]):null;
+  const p=prev?sortKey(prev):null, n=next?sortKey(next):null;
+  let val;
+  if(p===null&&n===null) val=Date.now()/1000;
+  else if(p===null) val=n-1;
+  else if(n===null) val=p+1;
+  else if(n-p>0.0000001) val=(p+n)/2;
+  if(val===undefined){                       // редкий случай: одинаковые метки — пересчитываем всё
+    const base=Math.floor(Date.now()/1000);
+    for(let i=0;i<ids.length;i++) await patchItem(ids[i],{sort:base+i});
+  }else{
+    await patchItem(dragId,{sort:val});
+  }
+  items=sortItems(items); render();
+});
+
+/* ---------- photo ---------- */
 let imgTarget=null;
 document.getElementById('fileimg').addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f||!imgTarget)return; const r=new FileReader();
+  const f=e.target.files[0]; if(!f||!imgTarget) return; const r=new FileReader();
   r.onload=ev=>{const img=new Image();img.onload=()=>{
     const max=360,sc=Math.min(1,max/Math.max(img.width,img.height));
     const cv=document.createElement('canvas');cv.width=img.width*sc;cv.height=img.height*sc;
@@ -390,15 +502,113 @@ document.getElementById('fileimg').addEventListener('change',function(e){
   r.readAsDataURL(f); e.target.value='';
 });
 
-/* export / import / csv */
+/* ---------- delete + undo ---------- */
+let undoItem=null, undoTimer=null;
+function askDelete(id){
+  const it=items.find(x=>x.id===id); if(!it) return;
+  const label=(it.name||'').trim()||'this item';
+  if(!confirm('Delete "'+label+'"?')) return;
+  undoItem=Object.assign({},it); delItem(id); showUndo(label);
+}
+function showUndo(label){
+  hideUndo(true);
+  const t=document.createElement('div'); t.className='toast'; t.id='toast';
+  t.innerHTML='<span>Deleted “'+esc(label)+'”</span><button type="button" id="undobtn">Undo</button>';
+  document.body.appendChild(t);
+  document.getElementById('undobtn').onclick=undoDelete;
+  undoTimer=setTimeout(()=>{undoItem=null;hideUndo();},12000);
+}
+function hideUndo(keep){ clearTimeout(undoTimer); const t=document.getElementById('toast'); if(t)t.remove(); if(!keep)undoItem=null; }
+async function undoDelete(){
+  const it=undoItem; hideUndo(); if(!it) return;
+  dirtyUntil=Date.now()+4000;
+  if(CLOUD){ try{ await api('items',{method:'POST',body:JSON.stringify([it])}); }catch(e){ setCloud(false,e.message); } }
+  items.push(it); items=sortItems(items);
+  if(!CLOUD) saveLocal();
+  if(CLOUD) await pull(true); else render();
+}
+
+/* ---------- comments ---------- */
+function myName(){ return localStorage.getItem(NKEY)||''; }
+function setName(){
+  const n=prompt('Your name (shown next to your notes):', myName()||'');
+  if(n && n.trim()){ localStorage.setItem(NKEY,n.trim()); return n.trim(); }
+  return myName();
+}
+function when(ts){
+  const d=Date.parse(ts); if(isNaN(d)) return '';
+  const m=Math.floor((Date.now()-d)/60000);
+  if(m<1) return 'just now'; if(m<60) return m+'m ago';
+  const h=Math.floor(m/60); if(h<24) return h+'h ago';
+  return Math.floor(h/24)+'d ago';
+}
+let sheetItem=null;
+async function openComments(id){
+  sheetItem=items.find(x=>x.id===id); if(!sheetItem) return;
+  const host=document.getElementById('sheet');
+  host.innerHTML=`
+    <div class="sheetbg" id="sheetbg">
+      <div class="sheet">
+        <div class="shead"><b>${esc(sheetItem.name)||'Item'}</b><button onclick="closeSheet()">✕</button></div>
+        <div class="slist" id="slist"><div class="empty-note">Loading…</div></div>
+        <div class="whoami" id="whoami"></div>
+        <div class="sfoot">
+          <textarea id="cbody" placeholder="Add a note — where to buy, size, who is bringing it…"></textarea>
+          <button onclick="sendComment()">Post</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('sheetbg').addEventListener('click',e=>{ if(e.target.id==='sheetbg') closeSheet(); });
+  drawWho(); await loadComments();
+}
+function drawWho(){
+  const w=document.getElementById('whoami'); if(!w) return;
+  const n=myName();
+  w.innerHTML = n ? `Posting as <b>${esc(n)}</b><button onclick="setName();drawWho()">change</button>`
+                  : `<button onclick="setName();drawWho()">Set your name</button>`;
+}
+function closeSheet(){ document.getElementById('sheet').innerHTML=''; sheetItem=null; }
+async function loadComments(){
+  const box=document.getElementById('slist'); if(!box||!sheetItem) return;
+  try{
+    const rows=await api('comments?select=*&item_id=eq.'+encodeURIComponent(sheetItem.id)+'&order=created_at.asc');
+    cCount[sheetItem.id]=rows.length;
+    box.innerHTML = rows.length ? rows.map(r=>
+      `<div class="cmt"><div class="who">${esc(r.author||'anon')}<i>${when(r.created_at)}</i></div>
+       <div class="body">${esc(r.body)}</div></div>`).join('')
+      : '<div class="empty-note">No notes yet. Add the first one.</div>';
+    box.scrollTop=box.scrollHeight;
+  }catch(e){ box.innerHTML='<div class="empty-note">Comments are not set up yet.</div>'; }
+}
+async function sendComment(){
+  const ta=document.getElementById('cbody'); const body=(ta.value||'').trim();
+  if(!body||!sheetItem) return;
+  let name=myName(); if(!name){ name=setName(); drawWho(); }
+  ta.value='';
+  try{
+    await api('comments',{method:'POST',body:JSON.stringify([{
+      id:uid()+uid(), item_id:sheetItem.id, author:name||'anon', body,
+      created_at:new Date().toISOString()}])});
+    await loadComments(); render();
+  }catch(e){ alert('Could not post the note'); ta.value=body; }
+}
+
+/* ---------- export / import / csv ---------- */
 function doExport(){ dl(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}),'burning-man-2026.json'); }
 function doImport(){ document.getElementById('filejson').click(); }
 document.getElementById('filejson').addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=async ev=>{ try{ const inc=JSON.parse(ev.target.result); if(!Array.isArray(inc))throw 0;
-    for(const it of inc){ const dup=items.find(x=>x.name.trim().toLowerCase()===(it.name||'').trim().toLowerCase() && x.section===it.section && x.sub===(it.sub||null));
-      if(!dup) await addItem({id:uid(),section:it.section||'camp',sub:it.sub||null,name:it.name||'',price:it.price||'',url:it.url||'',img:it.img||'',status:it.status||'need'}); }
-    render(); alert('Imported ✓'); }catch(err){ alert('Could not read that file'); } };
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=async ev=>{ try{
+      const inc=JSON.parse(ev.target.result); if(!Array.isArray(inc)) throw 0;
+      for(const it of inc){
+        const dup=items.find(x=>(x.name||'').trim().toLowerCase()===(it.name||'').trim().toLowerCase()
+                   && x.section===it.section && (x.sub||null)===(it.sub||null));
+        if(!dup){ const n={id:uid(),section:it.section||'camp',sub:it.sub||null,name:it.name||'',
+            price:it.price||'',url:it.url||'',img:it.img||'',status:it.status||'need'};
+          if(HAS_QTY)n.qty=it.qty||'1'; await addItem(n); }
+      }
+      render(); alert('Imported ✓');
+    }catch(err){ alert('Could not read that file'); } };
   r.readAsText(f); e.target.value='';
 });
 function doCSV(){
@@ -409,15 +619,14 @@ function doCSV(){
   dl(new Blob([csv],{type:'text/csv'}),'burning-man-2026.csv');
 }
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-let fT;function flashBtn(){}
 
-/* start + periodic cloud refresh */
+/* ---------- start ---------- */
 pull();
 if(CLOUD) setInterval(()=>{
   if(document.visibilityState!=='visible') return;
-  if(imgTarget) return;                     // picking a photo
-  if(Date.now()<dirtyUntil) return;         // just edited
-  if(isTyping()) return;                    // user is typing
+  if(imgTarget||dragEl||sheetItem) return;
+  if(Date.now()<dirtyUntil) return;
+  if(isTyping()) return;
   pull();
 },6000);
 </script>
