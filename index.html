@@ -254,7 +254,7 @@ function seed(){
 }
 
 /* ---------- вход: имя + пароль, без почты ---------- */
-const SKEY='bm-session', DOMAIN='@camp.local';
+const SKEY='bm-session', DOMAIN='@playalist.app';
 let session=null;
 try{ session=JSON.parse(localStorage.getItem(SKEY)||'null'); }catch(e){ session=null; }
 const me=()=>session&&session.user_id?session:null;
