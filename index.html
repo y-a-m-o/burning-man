@@ -283,7 +283,7 @@ function render(){
   }
   // banner
   const list=currentItems();
-  const sum=list.reduce((a,i)=>a+money(i.price)*qnum(i),0);
+  const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
   const packed=list.filter(i=>i.status==='bought').length;
   let title=s.lbl, art=s.art, tip=s.tip;
   if(subs){
