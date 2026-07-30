@@ -62,7 +62,7 @@
   .banner .count b{color:var(--accent2);font-size:18px;font-variant-numeric:tabular-nums}
   .banner .count div{color:var(--dim);font-size:12px}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;align-items:start}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;align-items:stretch}
   .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
     display:flex;flex-direction:column;position:relative;transition:border-color .15s,opacity .15s}
   .card:hover{border-color:#5a4938}
@@ -79,8 +79,10 @@
   .photo .ph b{font-size:26px;opacity:.6;font-weight:400;line-height:1}
 
   /* ---- вид просмотра ---- */
-  .vbody{padding:9px 10px 8px;display:flex;flex-direction:column;gap:6px}
-  .vname{font-weight:600;font-size:13.5px;line-height:1.25}
+  .vbody{padding:9px 10px 8px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .vrow{margin-top:auto}
+  .vname{font-weight:600;font-size:13.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden;min-height:2.6em;word-break:break-word}
   .vrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
   .vprice{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
   .vqty{font-size:12px;color:var(--accent2);border:1px solid var(--accent);border-radius:20px;padding:1px 7px}
@@ -95,7 +97,7 @@
   .shop{font-size:11px;color:var(--dim);white-space:nowrap;padding:0 4px}
 
   /* ---- вид правки ---- */
-  .grip{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px;cursor:grab;
+  .grip{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px;cursor:grab;letter-spacing:.08em;
     background:#191410;border-bottom:1px solid var(--line);color:var(--dim);font-size:12px;touch-action:none}
   .grip:active{cursor:grabbing}
   .ebody{padding:8px;display:flex;flex-direction:column;gap:6px}

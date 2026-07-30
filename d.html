@@ -253,37 +253,58 @@ function seed(){
           ...P.map(n=>mk('food','produce',n)), ...V.map(n=>mk('food','beverage',n)), ...A.map(n=>mk('food','alcohol',n))];
 }
 
-/* ---------- вход: имя + пароль, без почты ---------- */
-const SKEY='bm-session', DOMAIN='@playalist.app';
+/* ---------- вход: почта + пароль, без подтверждения ---------- */
+const SKEY='bm-session';
+const SITE=location.origin+location.pathname;
 let session=null;
 try{ session=JSON.parse(localStorage.getItem(SKEY)||'null'); }catch(e){ session=null; }
 const me=()=>session&&session.user_id?session:null;
 function saveSession(s){ session=s; try{localStorage.setItem(SKEY,JSON.stringify(s));}catch(e){} }
 function clearSession(){ session=null; try{localStorage.removeItem(SKEY);}catch(e){} }
 
-async function authCall(path,body){
-  const r=await fetch(SUPABASE_URL+'/auth/v1/'+path,{method:'POST',
-    headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+async function authCall(path,body,method,token){
+  const h={'apikey':SUPABASE_KEY,'Content-Type':'application/json'};
+  if(token) h['Authorization']='Bearer '+token;
+  const r=await fetch(SUPABASE_URL+'/auth/v1/'+path,{method:method||'POST',headers:h,body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok) throw new Error(j.msg||j.error_description||j.error||j.message||'auth failed');
   return j;
 }
-function storeAuth(j,name){
+function nameOf(u){ return (u&&u.user_metadata&&u.user_metadata.name)||(u&&u.email||'').split('@')[0]||'anon'; }
+function storeAuth(j,fallbackName){
   if(!j.access_token) throw new Error('no session returned');
   saveSession({access_token:j.access_token, refresh_token:j.refresh_token,
     expires_at:Date.now()+((j.expires_in||3600)*1000)-60000,
-    user_id:(j.user&&j.user.id)||(j.user_id), name});
+    user_id:(j.user&&j.user.id)||j.user_id,
+    email:(j.user&&j.user.email)||'',
+    name:(j.user?nameOf(j.user):null)||fallbackName||'anon'});
 }
-const uname=u=>String(u||'').trim().toLowerCase();
-async function signUp(u,p){ const n=uname(u);
-  const j=await authCall('signup',{email:n+DOMAIN,password:p,data:{name:n}}); storeAuth(j,n); }
-async function signIn(u,p){ const n=uname(u);
-  const j=await authCall('token?grant_type=password',{email:n+DOMAIN,password:p}); storeAuth(j,n); }
+async function signUp(email,pass,name){
+  const j=await authCall('signup',{email,password:pass,data:{name}});
+  if(!j.access_token) throw new Error('CONFIRM_REQUIRED');
+  storeAuth(j,name);
+}
+async function signIn(email,pass){
+  const j=await authCall('token?grant_type=password',{email,password:pass}); storeAuth(j);
+}
+async function sendReset(email){
+  await authCall('recover?redirect_to='+encodeURIComponent(SITE),{email});
+}
+async function applyNewPassword(token,pass){
+  const j=await authCall('user',{password:pass},'PUT',token);
+  return j;
+}
 async function refreshIfNeeded(){
   if(!session||!session.refresh_token) return;
   if(Date.now()<session.expires_at) return;
   try{ const j=await authCall('token?grant_type=refresh_token',{refresh_token:session.refresh_token});
        storeAuth(j,session.name); }catch(e){ clearSession(); }
+}
+/* ссылка из письма восстановления: #access_token=...&type=recovery */
+function recoveryToken(){
+  const h=location.hash||''; if(h.indexOf('type=recovery')<0) return null;
+  const p=new URLSearchParams(h.replace(/^#/,''));
+  return p.get('access_token');
 }
 
 /* ---------- store ---------- */
@@ -735,42 +756,86 @@ async function toggleLike(id){
 }
 
 /* ---------- gate: sign in / create account ---------- */
-function openGate(tab){
-  const host=document.getElementById('gate');
-  const signup = tab==='up';
-  host.innerHTML=`
+function gateShell(title,sub,fields,mainLabel,alts,hint){
+  return `
     <div class="gate">
       <div class="gbox">
-        <h2>${signup?'Create account':'Sign in'}</h2>
-        <p class="sub">${signup?'Name and password only — no email needed.':'Welcome back to the camp list.'}</p>
-        <label for="gu">Name</label>
-        <input id="gu" autocapitalize="none" autocomplete="username" placeholder="yamo">
-        <label for="gp">Password</label>
-        <input id="gp" type="password" autocomplete="${signup?'new-password':'current-password'}" placeholder="at least 6 characters">
+        <h2>${title}</h2>
+        <p class="sub">${sub}</p>
+        ${fields}
         <p class="gerr" id="gerr"></p>
-        <button class="main" id="gbtn">${signup?'Create account':'Sign in'}</button>
-        <button class="alt" onclick="openGate('${signup?'in':'up'}')">${signup?'I already have an account':'Create a new account'}</button>
-        <button class="alt" onclick="closeGate()">Just browse</button>
-        <p class="ghint">${signup?'Pick any name. Write the password down — without email there is no self-service reset yet; the camp owner can reset it.':'Forgot the password? Ask the camp owner to reset it.'}</p>
+        <button class="main" id="gbtn">${mainLabel}</button>
+        ${alts}
+        <p class="ghint">${hint}</p>
       </div>
     </div>`;
-  const go=async()=>{
-    const u=document.getElementById('gu').value.trim();
-    const p=document.getElementById('gp').value;
-    const err=document.getElementById('gerr');
-    if(!/^[a-z0-9_.-]{3,20}$/i.test(u)){ err.textContent='Name: 3–20 letters, digits, _ . -'; return; }
-    if(p.length<6){ err.textContent='Password: at least 6 characters'; return; }
-    err.textContent='…';
-    try{ signup ? await signUp(u,p) : await signIn(u,p); closeGate(); }
-    catch(e){ const m=String(e.message||'');
-      err.textContent = /already/i.test(m) ? 'That name is taken — try signing in'
-        : /Invalid login/i.test(m) ? 'Wrong name or password'
-        : /disabled/i.test(m) ? 'Email provider is off in Supabase settings'
-        : m.slice(0,120); }
-  };
-  document.getElementById('gbtn').onclick=go;
-  document.getElementById('gp').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
-  document.getElementById('gu').focus();
+}
+const fEmail='<label for="ge">Email</label><input id="ge" type="email" autocapitalize="none" autocomplete="email" placeholder="you@example.com">';
+const fPass=l=>'<label for="gp">Password</label><input id="gp" type="password" autocomplete="'+l+'" placeholder="at least 6 characters">';
+const fName='<label for="gn">Display name</label><input id="gn" autocomplete="nickname" placeholder="shown next to your notes">';
+const val=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+const setErr=t=>{const e=document.getElementById('gerr'); if(e) e.textContent=t;};
+function bindGate(fn){
+  document.getElementById('gbtn').onclick=fn;
+  ['ge','gp','gn'].forEach(id=>{const el=document.getElementById(id);
+    if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter') fn(); });});
+  const first=document.getElementById('ge')||document.getElementById('gp'); if(first) first.focus();
+}
+function friendly(m){
+  m=String(m||'');
+  if(m==='CONFIRM_REQUIRED'||/confirm/i.test(m)) return 'Email confirmation is still ON in Supabase — turn it off';
+  if(/already registered|already been/i.test(m)) return 'That email already has an account — sign in instead';
+  if(/Invalid login/i.test(m)) return 'Wrong email or password';
+  if(/rate limit/i.test(m)) return 'Too many emails — wait an hour (free plan sends 4/hour)';
+  if(/invalid/i.test(m)) return 'That email looks invalid';
+  return m.slice(0,140);
+}
+function openGate(tab){
+  const host=document.getElementById('gate');
+  if(tab==='reset'){
+    host.innerHTML=gateShell('Reset password','We will email you a link to set a new one.',fEmail,'Send reset link',
+      '<button class="alt" onclick="openGate(\'in\')">Back to sign in</button>',
+      'The link opens this page and lets you pick a new password.');
+    bindGate(async()=>{
+      const e=val('ge'); if(!/.+@.+\..+/.test(e)){ setErr('Enter your email'); return; }
+      setErr('Sending…');
+      try{ await sendReset(e); setErr(''); alert('Check your email for the reset link.'); openGate('in'); }
+      catch(err){ setErr(friendly(err.message)); }
+    });
+    return;
+  }
+  if(tab==='newpass'){
+    const tok=recoveryToken();
+    host.innerHTML=gateShell('Set a new password','Almost done — pick a new password.',fPass('new-password'),'Save password','','');
+    bindGate(async()=>{
+      const p=val('gp'); if(p.length<6){ setErr('At least 6 characters'); return; }
+      setErr('Saving…');
+      try{ await applyNewPassword(tok,p);
+           history.replaceState(null,'',SITE);
+           setErr(''); alert('Password updated — sign in with it.'); openGate('in'); }
+      catch(err){ setErr(friendly(err.message)); }
+    });
+    return;
+  }
+  const signup = tab==='up';
+  host.innerHTML=gateShell(
+    signup?'Create account':'Sign in',
+    signup?'Email, password, and the name your camp will see.':'Welcome back to the camp list.',
+    fEmail+fPass(signup?'new-password':'current-password')+(signup?fName:''),
+    signup?'Create account':'Sign in',
+    '<button class="alt" onclick="openGate(\''+(signup?'in':'up')+'\')">'+(signup?'I already have an account':'Create a new account')+'</button>'+
+    (signup?'':'<button class="alt" onclick="openGate(\'reset\')">Forgot password?</button>')+
+    '<button class="alt" onclick="closeGate()">Just browse</button>',
+    signup?'No confirmation email — you are in right away.':'Notes and likes need an account. Browsing does not.');
+  bindGate(async()=>{
+    const e=val('ge'), p=val('gp'), n=val('gn');
+    if(!/.+@.+\..+/.test(e)){ setErr('Enter a valid email'); return; }
+    if(p.length<6){ setErr('Password: at least 6 characters'); return; }
+    if(signup && n.length<2){ setErr('Pick a display name'); return; }
+    setErr('…');
+    try{ signup ? await signUp(e,p,n) : await signIn(e,p); closeGate(); }
+    catch(err){ setErr(friendly(err.message)); }
+  });
 }
 function closeGate(){ document.getElementById('gate').innerHTML=''; try{localStorage.setItem('bm-seen','1');}catch(e){} render(); }
 function signOut(){ clearSession(); render(); }
@@ -804,7 +869,8 @@ function dl(blob,name){const a=document.createElement('a');a.href=URL.createObje
 
 /* ---------- start ---------- */
 pull();
-if(!me() && !localStorage.getItem("bm-seen")) openGate("up");
+if(recoveryToken()) openGate("newpass");
+else if(!me() && !localStorage.getItem("bm-seen")) openGate("up");
 if(CLOUD) setInterval(()=>{
   if(document.visibilityState!=='visible') return;
   if(imgTarget||dragEl||sheetItem) return;
