@@ -47,6 +47,7 @@
   /* human day/night toggle */
   .subtabs{display:flex;gap:8px;margin-bottom:14px}
   .subtabs button{flex:1;padding:10px;border-radius:10px}
+  .subtabs button.on{border-color:var(--accent);color:var(--accent2);background:#2a1f14}
   .subtabs button.on[data-k="day"]{background:linear-gradient(90deg,#e8863c33,#ffb06622);border-color:var(--accent);color:var(--accent2)}
   .subtabs button.on[data-k="night"]{background:linear-gradient(90deg,#6f8cff22,#6f8cff11);border-color:var(--night);color:#a9bcff}
 
@@ -147,12 +148,22 @@ const uid = ()=>Math.random().toString(36).slice(2,10);
 const SECTIONS = [
   {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Shade, RV, power, water, camp life'},
   {key:'bike', ico:'🚲', lbl:'Bike', art:'🚲', tip:'Playa-proof bike and lights'},
-  {key:'human',ico:'🧍', lbl:'Person', art:'🧍', tip:'What you wear and carry'},
+  {key:'human',ico:'🧍', lbl:'Man', art:'🧍', tip:'What you wear and carry', subs:[
+    {key:'day',   lbl:'☀️ Day',   art:'🧍☀️', tip:'Heat, dust, sun — what you wear by day'},
+    {key:'night', lbl:'🌙 Night', art:'🧍🌙', tip:'Cold and dark — what you wear at night'},
+  ]},
+  {key:'food', ico:'🍉', lbl:'Food', art:'🍉', tip:'Groceries, drinks, bar', subs:[
+    {key:'produce',  lbl:'🥬 Produce',  art:'🥬', tip:'Fresh food and groceries for the week'},
+    {key:'beverage', lbl:'🥤 Beverage', art:'🥤', tip:'Water and non-alcoholic drinks'},
+    {key:'alcohol',  lbl:'🍸 Alcohol',  art:'🍸', tip:'Bar stock — cans only, no glass on playa'},
+  ]},
 ];
 const STATUS=[['need','need'],['maybe','maybe'],['bought','bought']];
 let HAS_QTY=false;   // включается сам, когда в базе появится колонка qty
 
-let view={section:'camp', sub:'day'};
+const subOf=s=>(s&&s.subs)?s.subs:null;
+const secOf=k=>SECTIONS.find(x=>x.key===k);
+let view={section:'camp', subs:{human:'day', food:'produce'}};
 let items=[];
 
 /* ---------- seed (first run) ---------- */
@@ -162,8 +173,13 @@ function seed(){
   const B=['Cruiser bike (used, single-speed)','Wax / dry chain lube (never wet lube)','Fat tires / wide rims','6 ft flag, unique pattern','EL-wire + spoke lights','Spare tube + patch kit','Mini pump','Multitool','Combination lock','Handlebar cup holder','Basket + bungee cords'];
   const D=['Goggles (tinted)','Respirator / buff','Camelbak / water bottle','Electrolytes','Mug on a carabiner','Coconut oil','Sunscreen SPF 50','Cooling neck gaiter','Handheld misting fan','Sharpie','Wet wipes + TP','Saline nasal spray','Gifts for gifting'];
   const N=['Headlamp with red mode (Nitecore)','Body blinkies','Warm layer / pashmina','Heated vest (USB)','Loop / Eargasm earplugs','EL-wire on costume','Faux fur coat','Power bank 20k','Backup flashlight'];
+  const P=['Watermelon','Oranges / clementines','Apples','Avocados','Limes (for drinks)','Carrots + celery','Cherry tomatoes','Hummus + dips','Eggs (breakfast burritos)','Bacon','Tortillas','Hard cheese (keeps well)','Bread / bagels','Peanut butter','Instant oatmeal','Trail mix + nuts','Jerky','Instant ramen / soup','Coffee + filters'];
+  const V=['Drinking water, 5 gal jugs','Coconut water','Sparkling water','Gatorade / electrolyte drinks','Cold brew concentrate','Ginger ale (settles stomach)','Juice boxes','Iced tea'];
+  const A=['Beer — cans only, no glass','Whiskey','Tequila / mezcal','Vodka','Boxed white wine','Prosecco (sunrise)','Aperol + vermouth','Bitters','Mixers: tonic + soda','Bar kit: shaker, jigger, opener','Reusable shot cups'];
   return [...L.map(n=>mk('camp',null,n)), ...B.map(n=>mk('bike',null,n)),
-          ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n))];
+          ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n)),
+          ...P.map(n=>mk('food','produce',n)), ...V.map(n=>mk('food','beverage',n)),
+          ...A.map(n=>mk('food','alcohol',n))];
 }
 
 /* ---------- store: cloud (Supabase REST) or local ---------- */
@@ -231,8 +247,15 @@ function setCloud(on,err){
 /* ---------- render ---------- */
 function money(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 function qnum(it){const n=parseInt(it.qty,10);return (isNaN(n)||n<1)?1:n;}
+function curSub(){                      // активный подраздел текущей секции (или null)
+  const subs=subOf(secOf(view.section));
+  if(!subs) return null;
+  if(!subs.some(x=>x.key===view.subs[view.section])) view.subs[view.section]=subs[0].key;
+  return view.subs[view.section];
+}
 function currentItems(){
-  return items.filter(i=>i.section===view.section && (view.section!=='human' || i.sub===view.sub));
+  const sub=curSub();
+  return items.filter(i=>i.section===view.section && (sub===null || i.sub===sub));
 }
 function render(){
   // nav
@@ -244,25 +267,29 @@ function render(){
     d.onclick=()=>{view.section=s.key;render();};
     nav.appendChild(d);
   });
-  // sub (human day/night)
+  // подразделы секции (если есть)
+  const s=secOf(view.section);
+  const subs=subOf(s);
+  const activeSub=curSub();
   const sub=document.getElementById('sub'); sub.innerHTML='';
-  if(view.section==='human'){
+  if(subs){
     const wrap=document.createElement('div'); wrap.className='subtabs';
-    [['day','☀️ Day'],['night','🌙 Night']].forEach(([k,l])=>{
-      const b=document.createElement('button'); b.dataset.k=k; b.textContent=l;
-      if(view.sub===k) b.className='on';
-      b.onclick=()=>{view.sub=k;render();}; wrap.appendChild(b);
+    subs.forEach(sb=>{
+      const b=document.createElement('button'); b.dataset.k=sb.key; b.textContent=sb.lbl;
+      if(activeSub===sb.key) b.className='on';
+      b.onclick=()=>{view.subs[view.section]=sb.key;render();}; wrap.appendChild(b);
     });
     sub.appendChild(wrap);
   }
   // banner
-  const s=SECTIONS.find(x=>x.key===view.section);
   const list=currentItems();
   const sum=list.reduce((a,i)=>a+money(i.price)*qnum(i),0);
   const packed=list.filter(i=>i.status==='bought').length;
   let title=s.lbl, art=s.art, tip=s.tip;
-  if(view.section==='human'){ art=view.sub==='day'?'🧍☀️':'🧍🌙'; title='Person · '+(view.sub==='day'?'Day':'Night');
-    tip=view.sub==='day'?'Heat, dust, sun — what you wear by day':'Cold and dark — what you wear at night'; }
+  if(subs){
+    const sb=subs.find(x=>x.key===activeSub);
+    if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); }
+  }
   document.getElementById('banner').innerHTML=
     `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
      <div class="count"><b>${packed}/${list.length}</b><div>bought · $${sum.toFixed(0)}</div></div>`;
@@ -270,7 +297,7 @@ function render(){
   const grid=document.getElementById('grid'); grid.innerHTML='';
   list.forEach(it=>grid.appendChild(card(it)));
   const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
-  add.onclick=()=>{const n={id:uid(),section:view.section,sub:view.section==='human'?view.sub:null,name:'',price:'',url:'',img:'',status:'need'}; if(HAS_QTY)n.qty='1'; addItem(n);};
+  add.onclick=()=>{const n={id:uid(),section:view.section,sub:curSub(),name:'',price:'',url:'',img:'',status:'need'}; if(HAS_QTY)n.qty='1'; addItem(n);};
   grid.appendChild(add);
 }
 function card(it){
@@ -375,8 +402,8 @@ document.getElementById('filejson').addEventListener('change',function(e){
   r.readAsText(f); e.target.value='';
 });
 function doCSV(){
-  const map=Object.fromEntries(STATUS); const secn={camp:'Camp',bike:'Bike',human:'Person'};
-  let rows=[['Section','Day/Night','Item','Qty','Price $','Link','Status']];
+  const map=Object.fromEntries(STATUS); const secn={camp:'Camp',bike:'Bike',human:'Man',food:'Food'};
+  let rows=[['Section','Subsection','Item','Qty','Price $','Link','Status']];
   items.forEach(i=>rows.push([secn[i.section]||i.section,i.sub||'',i.name,qnum(i),i.price,i.url,map[i.status]||i.status]));
   const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
   dl(new Blob([csv],{type:'text/csv'}),'burning-man-2026.csv');
