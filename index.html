@@ -149,8 +149,8 @@ const SECTIONS = [
   {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Shade, RV, power, water, camp life'},
   {key:'bike', ico:'🚲', lbl:'Bike', art:'🚲', tip:'Playa-proof bike and lights'},
   {key:'human',ico:'🧍', lbl:'Man', art:'🧍', tip:'What you wear and carry', subs:[
-    {key:'day',   lbl:'☀️ Day',   art:'🧍☀️', tip:'Heat, dust, sun — what you wear by day'},
-    {key:'night', lbl:'🌙 Night', art:'🧍🌙', tip:'Cold and dark — what you wear at night'},
+    {key:'day',   lbl:'☀️ Day',   art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
+    {key:'night', lbl:'🌙 Night', art:'🌙', tip:'Cold and dark — what you wear at night'},
   ]},
   {key:'food', ico:'🍉', lbl:'Food', art:'🍉', tip:'Groceries, drinks, bar', subs:[
     {key:'produce',  lbl:'🥬 Produce',  art:'🥬', tip:'Fresh food and groceries for the week'},
@@ -292,7 +292,7 @@ function render(){
   }
   document.getElementById('banner').innerHTML=
     `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
-     <div class="count"><b>${packed}/${list.length}</b><div>bought · $${sum.toFixed(0)}</div></div>`;
+     <div class="count"><b>${packed}/${list.length}</b><div>bought · total $${sum.toFixed(0)}</div></div>`;
   // grid
   const grid=document.getElementById('grid'); grid.innerHTML='';
   list.forEach(it=>grid.appendChild(card(it)));
