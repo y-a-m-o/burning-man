@@ -19,6 +19,7 @@
   body.editing{padding-bottom:110px}
   header{position:sticky;top:0;z-index:20;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
     background:linear-gradient(#0f0d0bee,#0f0d0baa);border-bottom:1px solid var(--line);padding:12px 16px}
+  .hwrap{max-width:1100px;margin:0 auto}
   .htop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   h1{font-size:17px;margin:0;letter-spacing:.3px;white-space:nowrap}
   h1 span{color:var(--accent)}
@@ -153,7 +154,7 @@
 </style>
 </head>
 <body>
-<header>
+<header><div class="hwrap">
   <div class="htop">
     <h1>🔥 Burning Man 2026 · <span>Inventory</span></h1>
     <span class="cloud" id="cloud">…</span>
@@ -162,7 +163,7 @@
   </div>
   <div id="tools"></div>
   <nav class="sections" id="nav"></nav>
-</header>
+</div></header>
 
 <div class="wrap">
   <div id="sub"></div>
@@ -186,11 +187,15 @@ const LKEY='bm-inv-2026', NKEY='bm-user-name';
 const uid=()=>Math.random().toString(36).slice(2,10);
 
 const SECTIONS=[
-  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Shade, RV, power, water, camp life'},
-  {key:'bike', ico:'🚲', lbl:'Bike', art:'🚲', tip:'Playa-proof bike and lights'},
+  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Everything that stays at camp', subs:[
+    {key:'supply',    lbl:'🧰 Supply',    art:'🧰', tip:'Shade, tools, water, camp life'},
+    {key:'equipment', lbl:'🔌 Equipment', art:'🔌', tip:'Big gear: generator, A/C, power, tanks'},
+    {key:'bike',      lbl:'🚲 Bike',      art:'🚲', tip:'Playa-proof bike and lights'},
+  ]},
   {key:'human',ico:'🧍', lbl:'Man',  art:'🧍', tip:'What you wear and carry', subs:[
-    {key:'day',   lbl:'☀️ Day',   art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
-    {key:'night', lbl:'🌙 Night', art:'🌙', tip:'Cold and dark — what you wear at night'},
+    {key:'day',      lbl:'☀️ Day',       art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
+    {key:'night',    lbl:'🌙 Night',     art:'🌙', tip:'Cold and dark — what you wear at night'},
+    {key:'firstaid', lbl:'🩹 First aid', art:'🩹', tip:'Meds and first aid — no pharmacy out there'},
   ]},
   {key:'food', ico:'🍉', lbl:'Food', art:'🍉', tip:'Groceries, drinks, bar', subs:[
     {key:'produce',  lbl:'🥬 Produce',  art:'🥬', tip:'Fresh food and groceries for the week'},
@@ -204,7 +209,7 @@ const subOf=s=>(s&&s.subs)?s.subs:null;
 
 let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false;
 let mode='view';
-let view={section:'camp', subs:{human:'day', food:'produce'}};
+let view={section:'camp', subs:{camp:'supply', human:'day', food:'produce'}};
 let items=[], cCount={};
 
 /* ---------- seed ---------- */
@@ -214,10 +219,12 @@ function seed(){
   const B=['Cruiser bike (used, single-speed)','Wax / dry chain lube (never wet lube)','Fat tires / wide rims','6 ft flag, unique pattern','EL-wire + spoke lights','Spare tube + patch kit','Mini pump','Multitool','Combination lock','Handlebar cup holder','Basket + bungee cords'];
   const D=['Goggles (tinted)','Respirator / buff','Camelbak / water bottle','Electrolytes','Mug on a carabiner','Coconut oil','Sunscreen SPF 50','Cooling neck gaiter','Handheld misting fan','Sharpie','Wet wipes + TP','Saline nasal spray','Gifts for gifting'];
   const N=['Headlamp with red mode (Nitecore)','Body blinkies','Warm layer / pashmina','Heated vest (USB)','Loop / Eargasm earplugs','EL-wire on costume','Faux fur coat','Power bank 20k','Backup flashlight'];
+  const E=['Generator (quiet inverter)','Extra propane tanks','Deep-cycle battery','Water pump','Extension cords + power strip'];
+  const F=['First aid kit','Bandages + gauze + tape','Blister care / moleskin','Ibuprofen + antacids','Antibiotic ointment','Tweezers (splinters)','Eye wash / saline','Aloe / after-sun gel','Personal medications'];
   const P=['Watermelon','Oranges / clementines','Apples','Avocados','Limes (for drinks)','Carrots + celery','Cherry tomatoes','Hummus + dips','Eggs (breakfast burritos)','Bacon','Tortillas','Hard cheese (keeps well)','Bread / bagels','Peanut butter','Instant oatmeal','Trail mix + nuts','Jerky','Instant ramen / soup','Coffee + filters'];
   const V=['Drinking water, 5 gal jugs','Coconut water','Sparkling water','Gatorade / electrolyte drinks','Cold brew concentrate','Ginger ale (settles stomach)','Juice boxes','Iced tea'];
   const A=['Beer — cans only, no glass','Whiskey','Tequila / mezcal','Vodka','Boxed white wine','Prosecco (sunrise)','Aperol + vermouth','Bitters','Mixers: tonic + soda','Bar kit: shaker, jigger, opener','Reusable shot cups'];
-  return [...L.map(n=>mk('camp',null,n)), ...B.map(n=>mk('bike',null,n)),
+  return [...L.map(n=>mk('camp','supply',n)), ...B.map(n=>mk('camp','bike',n)), ...E.map(n=>mk('camp','equipment',n)), ...F.map(n=>mk('human','firstaid',n)),
           ...D.map(n=>mk('human','day',n)), ...N.map(n=>mk('human','night',n)),
           ...P.map(n=>mk('food','produce',n)), ...V.map(n=>mk('food','beverage',n)), ...A.map(n=>mk('food','alcohol',n))];
 }
@@ -415,6 +422,21 @@ function viewCard(it){
   return c;
 }
 
+function moveOptions(it){
+  let out='';
+  SECTIONS.forEach(s=>{
+    const subs=subOf(s);
+    if(!subs){
+      const v=s.key+'|';
+      out+=`<option value="${v}" ${it.section===s.key&&!it.sub?'selected':''}>→ ${s.lbl}</option>`;
+    }else subs.forEach(sb=>{
+      const v=s.key+'|'+sb.key;
+      const sel=(it.section===s.key&&it.sub===sb.key)?'selected':'';
+      out+=`<option value="${v}" ${sel}>→ ${s.lbl} · ${sb.lbl.replace(/^\S+\s/,'')}</option>`;
+    });
+  });
+  return out;
+}
 function editCard(it){
   const c=document.createElement('div'); c.className='card'; c.dataset.id=it.id;
   c.innerHTML=`
@@ -429,6 +451,9 @@ function editCard(it){
       <select data-f="status" data-id="${it.id}">
         ${STATUS.map(s=>`<option value="${s[0]}" ${it.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}
       </select>
+      <select data-move="${it.id}" title="Move to another section">
+        ${moveOptions(it)}
+      </select>
       <input placeholder="link" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
       <button class="delbtn" data-del="${it.id}">Delete</button>
     </div>`;
@@ -438,6 +463,11 @@ function editCard(it){
 /* ---------- events ---------- */
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.dataset&&t.dataset.move){
+    const [section,sub]=t.value.split('|');
+    patchItem(t.dataset.move,{section,sub:sub||null}).then(render);
+    return;
+  }
   if(t.dataset&&t.dataset.f){
     patchItem(t.dataset.id,{[t.dataset.f]:t.value});
     if(t.dataset.f!=='name'&&t.dataset.f!=='url') render();
