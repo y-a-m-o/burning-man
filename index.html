@@ -93,6 +93,9 @@
     border:0;background:transparent;border-radius:11px 11px 0 0;cursor:pointer;color:var(--dim);
     font-size:13px;white-space:nowrap;transition:color .18s;min-width:0}
   nav.sections .stab .ico{font-size:15px;line-height:1}
+  nav.sections .stab.dash{flex:0 0 auto;padding:10px 15px}
+  nav.sections .stab.dash .lbl{display:none}
+  nav.sections .stab.dash .ico{font-size:17px}
   nav.sections .stab .lbl{font-size:13px;color:inherit;font-weight:600;overflow:hidden;text-overflow:ellipsis}
   nav.sections .stab:hover{color:var(--text)}
   nav.sections .stab.active{background:var(--folder);color:var(--accent2)}
@@ -323,6 +326,30 @@
   .viewtoggle{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .viewtoggle button{border:0;border-radius:0;padding:7px 11px;font-size:13px;background:transparent;color:var(--dim)}
   .viewtoggle button.on{background:var(--subon);color:var(--accent2)}
+  /* mission control */
+  .dash{display:flex;flex-direction:column;gap:12px;padding:12px 0 4px}
+  .dcount{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    background:var(--subon);border-radius:12px;padding:14px 16px}
+  .dcount b{font-size:34px;font-weight:600;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1}
+  .dcount span{font-size:13px;color:var(--dim)}
+  .dtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+  .dtile{background:var(--card);border:1px solid var(--card-line);border-radius:11px;padding:11px 13px}
+  .dtile .k{font-size:11px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+  .dtile .v{font-size:19px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  .dtile .s{font-size:11.5px;color:var(--dim);margin-top:2px}
+  .dsec{background:var(--card);border:1px solid var(--card-line);border-radius:11px;padding:12px 13px}
+  .drow{display:flex;align-items:center;gap:10px;margin:0 0 9px}
+  .drow:last-child{margin-bottom:0}
+  .drow .nm{font-size:13.5px;min-width:104px;flex:0 0 auto}
+  .drow .nm.sub{padding-left:12px;color:var(--dim);font-size:12.5px}
+  .bar{flex:1;height:7px;border-radius:20px;background:var(--subon);overflow:hidden;min-width:60px}
+  .bar i{display:block;height:100%;border-radius:20px;background:var(--good);transition:width .4s ease}
+  .bar.thin{height:5px}
+  .drow .pc{font-size:12px;color:var(--dim);width:64px;text-align:right;flex:0 0 auto;
+    font-variant-numeric:tabular-nums}
+  .dhead{font-size:11px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;margin:2px 0 0}
+  .dnote{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0}
+  .dnote b{color:var(--accent2);font-weight:600}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:60;display:flex;
     align-items:center;gap:12px;background:var(--menu);border:1px solid var(--menu-line);
     border-radius:12px;padding:10px 12px 10px 14px;box-shadow:0 10px 28px var(--shadow);max-width:92vw}
@@ -428,6 +455,7 @@ const LKEY='bm-inv-2026', NKEY='bm-user-name';
 const uid=()=>Math.random().toString(36).slice(2,10);
 
 const SECTIONS=[
+  {key:'dash', ico:'💣', lbl:'', dash:true, cover:'', tip:'Mission control'},
   {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', cover:'', tip:'Everything that stays at camp', subs:[
     {key:'supply',    lbl:'🧰 Supply',    art:'🧰', tip:'Shade, tools, water, camp life'},
     {key:'equipment', lbl:'🔌 Equipment', art:'🔌', tip:'Big gear: generator, A/C, power, tanks'},
@@ -639,18 +667,23 @@ let acc=0, lock=0;
 function setNav(hide){
   if(document.body.classList.contains('navhidden')===hide) return;
   document.body.classList.toggle('navhidden',hide);
-  acc=0; lock=Date.now()+420;                 // пауза: смена высоты шапки сама двигает страницу
+  acc=0; if(hide) lock=Date.now()+260;        // пауза нужна только когда прячем
   setTimeout(()=>{ lastY=Math.max(0,window.scrollY||0); acc=0; },400);
 }
 function onScroll(){
   const y=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
   const d=y-lastY; lastY=y; navTick=false;
-  if(Date.now()<lock){ acc=0; return; }
-  if(y<60){ setNav(false); pinned=false; return; }
-  if((d>0&&acc<0)||(d<0&&acc>0)) acc=0;
+  if(y<60){ setNav(false); pinned=false; acc=0; return; }
+  if(d<0){                                  // вверх — показываем сразу
+    if(acc>0) acc=0;
+    acc+=d;
+    if(acc<-12) setNav(false);
+    return;
+  }
+  if(Date.now()<lock){ acc=0; return; }     // пауза нужна только для скрытия
+  if(acc<0) acc=0;
   acc+=d;
-  if(acc>30){ pinned=false; setNav(true); }
-  else if(acc<-30){ setNav(false); }
+  if(acc>44){ pinned=false; setNav(true); }
 }
 window.addEventListener('scroll',()=>{ if(!navTick){ navTick=true; requestAnimationFrame(onScroll); } },{passive:true});
 /* тема: по умолчанию как в системе, переключатель перебивает */
@@ -696,6 +729,58 @@ function drawMenu(){
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
 
 /* ---------- render ---------- */
+function fmt(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+function statsFor(list){
+  const total=list.length;
+  const got=list.filter(i=>i.status==='bought').length;
+  const maybe=list.filter(i=>i.status==='maybe').length;
+  const spent=list.filter(i=>i.status==='bought').reduce((a,i)=>a+money(i.price)*qnum(i),0);
+  const left=list.filter(i=>i.status==='need').reduce((a,i)=>a+money(i.price)*qnum(i),0);
+  const maybeSum=list.filter(i=>i.status==='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
+  const noPrice=list.filter(i=>i.status!=='bought' && !money(i.price)).length;
+  return {total,got,maybe,spent,left,maybeSum,noPrice,pc: total?Math.round(got/total*100):0};
+}
+function daysToBurn(){
+  const gate=new Date(2026,7,30);
+  return Math.max(0, Math.ceil((gate-new Date())/86400000));
+}
+function renderDash(host){
+  const real=items.filter(i=>i.section!=='dash');
+  const all=statsFor(real);
+  let h='<div class="dash">';
+  h+='<div class="dcount"><b>'+daysToBurn()+'</b><span>days until the gate opens · Aug 30, 2026</span></div>';
+  h+='<div class="dtiles">'+
+    '<div class="dtile"><div class="k">Got it</div><div class="v">'+all.got+' / '+all.total+'</div>'+
+      '<div class="s">'+all.pc+'% of the list</div></div>'+
+    '<div class="dtile"><div class="k">Spent</div><div class="v">'+fmt(all.spent)+'</div>'+
+      '<div class="s">on '+all.got+' items</div></div>'+
+    '<div class="dtile"><div class="k">Still to buy</div><div class="v">'+fmt(all.left)+'</div>'+
+      '<div class="s">'+(all.total-all.got-all.maybe)+' marked need</div></div>'+
+    '<div class="dtile"><div class="k">Maybe</div><div class="v">'+fmt(all.maybeSum)+'</div>'+
+      '<div class="s">'+all.maybe+' undecided</div></div>'+
+    '</div>';
+  h+='<p class="dhead">Progress by section</p><div class="dsec">';
+  SECTIONS.filter(x=>!x.dash).forEach(sec=>{
+    const list=real.filter(i=>i.section===sec.key);
+    const st=statsFor(list);
+    h+='<div class="drow"><span class="nm">'+sec.lbl+'</span>'+
+      '<span class="bar"><i style="width:'+st.pc+'%"></i></span>'+
+      '<span class="pc">'+st.got+'/'+st.total+'</span></div>';
+    (sec.subs||[]).forEach(sb=>{
+      const sl=list.filter(i=>i.sub===sb.key); const ss=statsFor(sl);
+      h+='<div class="drow"><span class="nm sub">'+sb.lbl.replace(/^\S+\s/,'')+'</span>'+
+        '<span class="bar thin"><i style="width:'+ss.pc+'%"></i></span>'+
+        '<span class="pc">'+ss.got+'/'+ss.total+'</span></div>';
+    });
+  });
+  h+='</div>';
+  h+='<p class="dhead">Needs attention</p><div class="dsec"><p class="dnote">'+
+    '<b>'+all.noPrice+'</b> items still have no price — you cannot budget what you have not priced.<br>'+
+    '<b>'+all.maybe+'</b> sit in maybe. Each one is a decision you are still carrying.'+
+    '</p></div>';
+  h+='</div>';
+  host.innerHTML=h;
+}
 function render(){
   document.body.classList.toggle('editing', mode==='edit');
   const lb=document.getElementById('layoutbox');
@@ -710,7 +795,7 @@ function render(){
 
   const nav=document.getElementById('nav'); nav.innerHTML='';
   SECTIONS.forEach(s=>{
-    const d=document.createElement('div'); d.className='stab'+(view.section===s.key?' active':'');
+    const d=document.createElement('div'); d.className='stab'+(s.dash?' dash':'')+(view.section===s.key?' active':'');
     d.innerHTML=`<span class="ico">${s.ico}</span><span class="lbl">${s.lbl}</span>`;
     d.onclick=()=>{view.section=s.key;render();};
     nav.appendChild(d);
@@ -744,6 +829,10 @@ function render(){
      <span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
+  if(s.dash){ grid.className=''; renderDash(grid);
+    document.getElementById('summary').innerHTML='<span class="ttl">Mission control</span>'+
+      '<span class="tip">Where the camp stands right now</span>';
+    document.getElementById('donebar').innerHTML=''; return; }
   grid.className='grid'+(layout==='list'?' list':'')+(mode==='edit'?' editmode':'');
   list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
   if(mode==='edit'){
