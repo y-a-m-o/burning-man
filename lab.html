@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folder tab — four takes</title>
+<style>
+  :root{
+    --bg:#0f0d0b; --text:#f3ece2; --dim:#a89a86; --accent:#e8863c; --accent2:#ffb066;
+    --good:#5fbf7a; --warn:#e8b84b; --maybe:#a982e8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);padding:24px 16px 80px;
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:860px;margin:0 auto}
+  h1{font-size:19px;font-weight:600;margin:0 0 4px}
+  .lede{color:var(--dim);font-size:13.5px;margin:0 0 26px}
+  .case{margin:0 0 34px}
+  .caption{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+  .caption b{font-size:15px}
+  .caption span{color:var(--dim);font-size:12.5px}
+  .key{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+    border-radius:7px;background:var(--accent);color:#1a0f06;font-weight:700;font-size:12px}
+
+  /* общие части строк */
+  .rows{padding:2px 0 4px}
+  .row{display:grid;grid-template-columns:34px minmax(0,1fr) 68px 76px;align-items:center;
+    column-gap:12px;padding:9px 0;border-bottom:1px solid var(--hair)}
+  .row:last-child{border-bottom:0}
+  .thumb{width:34px;height:34px;border-radius:8px;background:#1c1611;display:flex;align-items:center;
+    justify-content:center;font-size:15px}
+  .nm{font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pr{justify-self:end;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px}
+  .st{justify-self:center;width:100%;text-align:center;font-size:11px;padding:3px 0;border-radius:20px;border:1px solid}
+  .st.need{color:var(--warn);border-color:#5b4a2f}
+  .st.maybe{color:var(--maybe);border-color:#4a3a63}
+  .st.bought{color:var(--good);border-color:#2f5b3a}
+  .sum{display:flex;align-items:center;gap:10px;padding:11px 2px}
+  .sum .ic{font-size:19px}
+  .sum .tip{color:var(--dim);font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sum .nums{font-size:12.5px;color:var(--dim);white-space:nowrap}
+  .sum .nums b{color:var(--accent2);font-size:14px;font-variant-numeric:tabular-nums}
+
+  /* ——— общая механика язычка: вогнутые сопряжения через mask ——— */
+  .tabs{display:flex;align-items:flex-end;gap:0;padding-left:2px}
+  .tab{position:relative;display:flex;align-items:center;gap:7px;cursor:pointer;
+    color:var(--dim);font-size:13.5px;white-space:nowrap;transition:color .18s}
+  .tab:hover{color:var(--text)}
+  .tab.on{color:var(--accent2);font-weight:600}
+  .tab.on::before,.tab.on::after{content:"";position:absolute;bottom:0;width:var(--joint);height:var(--joint);
+    background:var(--surface)}
+  .tab.on::before{left:calc(var(--joint) * -1);
+    -webkit-mask:radial-gradient(circle var(--joint) at 0 0,transparent 0 var(--joint),#000 var(--joint));
+            mask:radial-gradient(circle var(--joint) at 0 0,transparent 0 var(--joint),#000 var(--joint))}
+  .tab.on::after{right:calc(var(--joint) * -1);
+    -webkit-mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint));
+            mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
+  .panel{background:var(--surface);padding:0 14px 6px}
+  .subs{display:flex;gap:3px;padding:9px 0 2px}
+  .sub{padding:6px 12px;border-radius:8px;font-size:12.5px;color:var(--dim);cursor:pointer;
+    background:transparent;border:0;transition:.18s}
+  .sub:hover{color:var(--text)}
+  .sub.on{background:var(--subon);color:var(--accent2);font-weight:600}
+
+  /* ——— A. Классический язычок ——— */
+  .A{--surface:#241b12;--hair:#34281a;--subon:#3a2a15;--joint:13px}
+  .A .tab{padding:11px 18px;border-radius:12px 12px 0 0}
+  .A .tab.on{background:var(--surface)}
+  .A .panel{border-radius:0 14px 14px 14px}
+  .A .tab.on:first-child + .tab, .A .tabs .tab:first-child.on ~ .panel{}
+
+  /* ——— B. Мягкий, тёплый ——— */
+  .B{--surface:#2a2016;--hair:#3b2e1f;--subon:#46341c;--joint:16px}
+  .B .tab{padding:13px 22px;border-radius:16px 16px 0 0;font-size:14px}
+  .B .tab.on{background:linear-gradient(#31261a,var(--surface))}
+  .B .panel{border-radius:0 18px 18px 18px;box-shadow:0 10px 30px #0006}
+  .B .sub{padding:7px 14px;border-radius:10px}
+
+  /* ——— C. Тихий: без обводок, только поверхность ——— */
+  .C{--surface:#1c1712;--hair:#2b241c;--subon:#2e2419;--joint:12px}
+  .C .tab{padding:10px 16px;border-radius:11px 11px 0 0;font-size:13px;letter-spacing:.01em}
+  .C .tab.on{background:var(--surface)}
+  .C .panel{border-radius:0 12px 12px 12px}
+  .C .sum .ic{font-size:16px}
+
+  /* ——— D. С акцентной кромкой ——— */
+  .D{--surface:#231a11;--hair:#352817;--subon:#3d2c14;--joint:14px}
+  .D .tab{padding:12px 20px;border-radius:13px 13px 0 0}
+  .D .tab.on{background:var(--surface);box-shadow:inset 0 2px 0 0 var(--accent)}
+  .D .panel{border-radius:0 15px 15px 15px}
+  .D .sub{text-transform:uppercase;letter-spacing:.08em;font-size:11px;padding:7px 12px}
+
+  .note{color:var(--dim);font-size:12.5px;margin:26px 0 0;padding:14px;border:1px dashed #3a2f24;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Язычок папки — четыре исполнения</h1>
+  <p class="lede">Одни и те же данные, разная подача. Скажи букву — внедрю в приложение.</p>
+
+  <div class="case A">
+    <div class="caption"><span class="key">A</span><b>Классический</b><span>плотный, ровные пропорции</span></div>
+    <div class="tabs">
+      <div class="tab on">⛺ Camp</div><div class="tab">🧍 Man</div><div class="tab">🍉 Food</div>
+    </div>
+    <div class="panel">
+      <div class="subs"><button class="sub on">Supply</button><button class="sub">Equipment</button><button class="sub">Bike</button></div>
+      <div class="sum"><span class="ic">🧰</span><span class="tip">Shade, tools, water, camp life</span>
+        <span class="nums"><b>1/22</b> bought · total <b>$231</b></span></div>
+      <div class="rows">
+        <div class="row"><div class="thumb">🎞</div><div class="nm">3 Blue Multi-Purpose Masking Tape</div><div class="pr">$6</div><div class="st bought">bought</div></div>
+        <div class="row"><div class="thumb">🔩</div><div class="nm">16 Pack Screw</div><div class="pr">$20</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🧹</div><div class="nm">Dust mat + broom</div><div class="pr">$5</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🚽</div><div class="nm">Outdoor Toilet 5.3Gallon</div><div class="pr">$65</div><div class="st maybe">maybe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="case B">
+    <div class="caption"><span class="key">B</span><b>Мягкий</b><span>крупнее, тень, тёплый градиент</span></div>
+    <div class="tabs">
+      <div class="tab on">⛺ Camp</div><div class="tab">🧍 Man</div><div class="tab">🍉 Food</div>
+    </div>
+    <div class="panel">
+      <div class="subs"><button class="sub on">Supply</button><button class="sub">Equipment</button><button class="sub">Bike</button></div>
+      <div class="sum"><span class="ic">🧰</span><span class="tip">Shade, tools, water, camp life</span>
+        <span class="nums"><b>1/22</b> bought · total <b>$231</b></span></div>
+      <div class="rows">
+        <div class="row"><div class="thumb">🎞</div><div class="nm">3 Blue Multi-Purpose Masking Tape</div><div class="pr">$6</div><div class="st bought">bought</div></div>
+        <div class="row"><div class="thumb">🔩</div><div class="nm">16 Pack Screw</div><div class="pr">$20</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🧹</div><div class="nm">Dust mat + broom</div><div class="pr">$5</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🚽</div><div class="nm">Outdoor Toilet 5.3Gallon</div><div class="pr">$65</div><div class="st maybe">maybe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="case C">
+    <div class="caption"><span class="key">C</span><b>Тихий</b><span>минимум контраста, вся сила у названий</span></div>
+    <div class="tabs">
+      <div class="tab on">⛺ Camp</div><div class="tab">🧍 Man</div><div class="tab">🍉 Food</div>
+    </div>
+    <div class="panel">
+      <div class="subs"><button class="sub on">Supply</button><button class="sub">Equipment</button><button class="sub">Bike</button></div>
+      <div class="sum"><span class="ic">🧰</span><span class="tip">Shade, tools, water, camp life</span>
+        <span class="nums"><b>1/22</b> bought · total <b>$231</b></span></div>
+      <div class="rows">
+        <div class="row"><div class="thumb">🎞</div><div class="nm">3 Blue Multi-Purpose Masking Tape</div><div class="pr">$6</div><div class="st bought">bought</div></div>
+        <div class="row"><div class="thumb">🔩</div><div class="nm">16 Pack Screw</div><div class="pr">$20</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🧹</div><div class="nm">Dust mat + broom</div><div class="pr">$5</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🚽</div><div class="nm">Outdoor Toilet 5.3Gallon</div><div class="pr">$65</div><div class="st maybe">maybe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="case D">
+    <div class="caption"><span class="key">D</span><b>С кромкой</b><span>акцентная линия сверху, подписи капслоком</span></div>
+    <div class="tabs">
+      <div class="tab on">⛺ Camp</div><div class="tab">🧍 Man</div><div class="tab">🍉 Food</div>
+    </div>
+    <div class="panel">
+      <div class="subs"><button class="sub on">Supply</button><button class="sub">Equipment</button><button class="sub">Bike</button></div>
+      <div class="sum"><span class="ic">🧰</span><span class="tip">Shade, tools, water, camp life</span>
+        <span class="nums"><b>1/22</b> bought · total <b>$231</b></span></div>
+      <div class="rows">
+        <div class="row"><div class="thumb">🎞</div><div class="nm">3 Blue Multi-Purpose Masking Tape</div><div class="pr">$6</div><div class="st bought">bought</div></div>
+        <div class="row"><div class="thumb">🔩</div><div class="nm">16 Pack Screw</div><div class="pr">$20</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🧹</div><div class="nm">Dust mat + broom</div><div class="pr">$5</div><div class="st need">need</div></div>
+        <div class="row"><div class="thumb">🚽</div><div class="nm">Outdoor Toilet 5.3Gallon</div><div class="pr">$65</div><div class="st maybe">maybe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Во всех четырёх стык язычка с панелью сделан вогнутым сопряжением — той самой деталью, которой не хватало.
+  Отличаются пропорции, глубина и характер. Можно назвать букву и что в ней поправить: «B, но подразделы как в A».</p>
+</div>
+</body>
+</html>
