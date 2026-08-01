@@ -488,17 +488,24 @@ function currentItems(){
 /* ---------- mode ---------- */
 /* меню уезжает при прокрутке вниз и возвращается при прокрутке вверх */
 let lastY=0, navTick=false, pinned=false;
-function hideNav(){ if(!pinned) document.body.classList.add('navhidden'); }
-function showNav(){ document.body.classList.remove('navhidden'); pinned=true; }
-let acc=0;
+function hideNav(){ if(!pinned) setNav(true); }
+function showNav(){ setNav(false); pinned=true; }
+let acc=0, lock=0;
+function setNav(hide){
+  if(document.body.classList.contains('navhidden')===hide) return;
+  document.body.classList.toggle('navhidden',hide);
+  acc=0; lock=Date.now()+420;                 // пауза: смена высоты шапки сама двигает страницу
+  setTimeout(()=>{ lastY=Math.max(0,window.scrollY||0); acc=0; },400);
+}
 function onScroll(){
   const y=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
   const d=y-lastY; lastY=y; navTick=false;
-  if(y<60){ document.body.classList.remove('navhidden'); pinned=false; acc=0; return; }
-  if((d>0&&acc<0)||(d<0&&acc>0)) acc=0;   // сменил направление — считаем заново
+  if(Date.now()<lock){ acc=0; return; }
+  if(y<60){ setNav(false); pinned=false; return; }
+  if((d>0&&acc<0)||(d<0&&acc>0)) acc=0;
   acc+=d;
-  if(acc>30){ acc=0; pinned=false; document.body.classList.add('navhidden'); }
-  else if(acc<-30){ acc=0; document.body.classList.remove('navhidden'); }
+  if(acc>30){ pinned=false; setNav(true); }
+  else if(acc<-30){ setNav(false); }
 }
 window.addEventListener('scroll',()=>{ if(!navTick){ navTick=true; requestAnimationFrame(onScroll); } },{passive:true});
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
