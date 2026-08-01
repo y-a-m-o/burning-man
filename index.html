@@ -922,10 +922,10 @@ function teamStats(real){
   real.forEach(i=>{
     const k=i.claimed_by||'__none';
     if(!by[k]) by[k]={uid:i.claimed_by||null,name:i.claimed_name||t('unclaimed'),n:0,got:0,spent:0,left:0};
-    const t=by[k]; t.n++;
+    const row=by[k]; row.n++;
     const v=money(i.price)*qnum(i);
-    if(i.status==='bought'){ t.got++; t.spent+=v; }
-    else if(i.status==='need'){ t.left+=v; }
+    if(i.status==='bought'){ row.got++; row.spent+=v; }
+    else if(i.status==='need'){ row.left+=v; }
   });
   return Object.values(by).sort((a,b)=>(b.uid?1:0)-(a.uid?1:0)||b.n-a.n);
 }

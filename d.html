@@ -15,6 +15,7 @@
     --field:#0f0d0b; --field-line:#3a2f24;
     --menu:#221b14; --menu-line:#3d3126; --menu-hover:#2e2419;
     --shadow:#000a; --tabhover:#2a1f14; --on-accent:#1a0f06;
+    --dotc:#5fbf7a; --dotglow:rgba(95,191,122,.22);
     color-scheme:dark;
   }
   :root[data-theme="light"]{
@@ -26,6 +27,7 @@
     --field:#ffffff; --field-line:#ddd2c0;
     --menu:#ffffff; --menu-line:#e0d5c3; --menu-hover:#f4ece0;
     --shadow:#00000026; --tabhover:#f4ece0; --on-accent:#fff;
+    --dotc:#6f9c5e; --dotglow:rgba(111,156,94,.26);
     color-scheme:light;
   }
   @media (prefers-color-scheme:light){
@@ -38,6 +40,8 @@
       --field:#ffffff; --field-line:#ddd2c0;
       --menu:#ffffff; --menu-line:#e0d5c3; --menu-hover:#f4ece0;
       --shadow:#00000026; --tabhover:#f4ece0; --on-accent:#fff;
+      --dotc:#6f9c5e; --dotglow:rgba(111,156,94,.26);
+    --dotc:#6f9c5e; --dotglow:rgba(111,156,94,.26);
       color-scheme:light;
     }
   }
@@ -56,8 +60,8 @@
   h1 b{font-weight:600}
   h1 span{color:var(--accent);font-weight:400}
   @media(max-width:620px){ h1 span{display:none} }
-  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--good);
-    box-shadow:0 0 7px var(--good);transition:.2s}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--dotc);
+    box-shadow:0 0 0 3px var(--dotglow);transition:.2s}
   .dot.off{background:var(--warn);box-shadow:0 0 7px var(--warn)}
   .editbtn{background:transparent;border:1px solid var(--accent);color:var(--accent2);font-weight:600;
     height:32px;padding:0 16px;font-size:13px;flex:0 0 auto;letter-spacing:.02em;border-radius:9px}
@@ -484,7 +488,7 @@
 <body>
 <header><div class="hwrap">
   <div class="htop">
-    <h1>🔥 <b>BM 2026</b><span> · Inventory</span></h1>
+    <h1>🔥 <b>BM 2026</b><span id="h1sub"></span></h1>
     <span class="dot" id="cloud" title="…"></span>
     <span class="spacer"></span>
     <span id="layoutbox"></span>
@@ -523,29 +527,102 @@ const CLOUD = !!(SUPABASE_URL && SUPABASE_KEY);
 const LKEY='bm-inv-2026', NKEY='bm-user-name';
 const uid=()=>Math.random().toString(36).slice(2,10);
 
+/* ---------- языки ---------- */
+const I18N={
+  en:{
+    inventory:'Inventory', edit:'Edit', done:'Done',
+    refresh:'Refresh', exportB:'Export backup', importB:'Import backup', csv:'Download CSV',
+    signin:'Sign in', signout:'Sign out', profile:'My profile', language:'Українська',
+    buying:"✓ I'm buying…", cancel:'✕ Cancel', save:'Save',
+    boughtTotal:'bought · total', need:'need', maybe:'maybe', bought:'got it',
+    camp:'Camp', body:'Body', food:'Food',
+    supply:'Supply', equipment:'Equipment', bike:'Bike',
+    day:'Day', night:'Night', firstaid:'First aid',
+    produce:'Produce', beverage:'Beverage', alcohol:'Alcohol',
+    tCamp:'Welcome Home', tBody:'Body Mastering', tFood:'Life Support', tDash:'Mission Control',
+    readiness:'Mission readiness', burnday:'Burn day', preparing:'preparing', onplaya:'on playa',
+    handled:'handled', gotit:'Got it', spent:'Spent', tobuy:'Still to buy', undecided:'undecided',
+    ofList:'of the list', onItems:'on', markedNeed:'marked need',
+    team:'Team', progress:'Progress by section', attention:'Needs attention',
+    noClaims:'Nobody has claimed anything yet. Tap “I\'m buying…” in a section and pick what you take.',
+    unclaimed:'Unclaimed',
+    noPrice:'items still have no price — you cannot budget what you have not priced.',
+    inMaybe:'sit in maybe. Each one is a decision you are still carrying.',
+    itemName:'Item name', link:'link', photo:'photo', addItem:'+ add item', del:'Delete',
+    moveTo:'Move to another section', notes:'Notes', addNote:'Where to buy, size, who is bringing it…',
+    post:'Post', noNotes:'No notes yet. Add the first one.', edited:'edited',
+    signinNote:'Sign in to leave a note', postingAs:'Posting as',
+    justNow:'just now', mAgo:'m ago', hAgo:'h ago', dAgo:'d ago',
+    deleted:'Deleted', undo:'Undo', viewOnly:'View only — sign in to make changes',
+    createAcc:'Create account', haveAcc:'I already have an account', newAcc:'Create a new account',
+    browse:'Just browse', forgot:'Forgot password?', email:'Email', password:'Password',
+    dname:'Display name', myProfile:'My profile', choosePhoto:'Choose photo',
+    yourName:'Your name', profileHint:'Your face shows up on everything you take on.',
+    daysLeft:'days until the gate opens'
+  },
+  uk:{
+    inventory:'Інвентар', edit:'Редагувати', done:'Готово',
+    refresh:'Оновити', exportB:'Експорт копії', importB:'Імпорт копії', csv:'Завантажити CSV',
+    signin:'Увійти', signout:'Вийти', profile:'Мій профіль', language:'English',
+    buying:'✓ Я купую…', cancel:'✕ Скасувати', save:'Зберегти',
+    boughtTotal:'куплено · разом', need:'треба', maybe:'можливо', bought:'є',
+    camp:'Табір', body:'Тіло', food:'Їжа',
+    supply:'Спорядження', equipment:'Техніка', bike:'Велосипед',
+    day:'День', night:'Ніч', firstaid:'Аптечка',
+    produce:'Продукти', beverage:'Напої', alcohol:'Алкоголь',
+    tCamp:'Ласкаво просимо додому', tBody:'Володіння тілом', tFood:'Життєзабезпечення', tDash:'Центр керування',
+    readiness:'Готовність місії', burnday:'День спалення', preparing:'готуємось', onplaya:'на плаї',
+    handled:'закрито', gotit:'Є', spent:'Витрачено', tobuy:'Ще купити', undecided:'нерозв’язаних',
+    ofList:'списку', onItems:'на', markedNeed:'позначено «треба»',
+    team:'Команда', progress:'Прогрес за розділами', attention:'Потребує уваги',
+    noClaims:'Поки що ніхто нічого не взяв. Натисни «Я купую…» у розділі й познач своє.',
+    unclaimed:'Нічиє',
+    noPrice:'позицій досі без ціни — бюджет не порахувати, поки їх не оцінено.',
+    inMaybe:'у стані «можливо». Кожна — рішення, яке ти досі носиш із собою.',
+    itemName:'Назва', link:'посилання', photo:'фото', addItem:'+ додати', del:'Видалити',
+    moveTo:'Перенести в інший розділ', notes:'Нотатки', addNote:'Де купити, розмір, хто везе…',
+    post:'Надіслати', noNotes:'Нотаток ще немає. Додай першу.', edited:'змінено',
+    signinNote:'Увійди, щоб залишити нотатку', postingAs:'Пишеш як',
+    justNow:'щойно', mAgo:' хв тому', hAgo:' год тому', dAgo:' дн тому',
+    deleted:'Видалено', undo:'Повернути', viewOnly:'Тільки перегляд — увійди, щоб редагувати',
+    createAcc:'Створити акаунт', haveAcc:'У мене вже є акаунт', newAcc:'Створити новий акаунт',
+    browse:'Просто подивитись', forgot:'Забув пароль?', email:'Пошта', password:'Пароль',
+    dname:'Ім’я для команди', myProfile:'Мій профіль', choosePhoto:'Обрати фото',
+    yourName:'Твоє ім’я', profileHint:'Твоє фото з’являється на всьому, що ти береш на себе.',
+    daysLeft:'днів до відкриття воріт'
+  }
+};
+let LANG=(function(){ try{ return localStorage.getItem('bm-lang')||'en'; }catch(e){ return 'en'; } })();
+function t(k){ return (I18N[LANG]&&I18N[LANG][k]) || I18N.en[k] || k; }
+function toggleLang(){ LANG = LANG==='uk' ? 'en' : 'uk';
+  try{ localStorage.setItem('bm-lang',LANG); }catch(e){}
+  document.documentElement.lang = LANG==='uk' ? 'uk' : 'en';
+  render(); }
+const canEdit=()=>!!me();
 const SECTIONS=[
-  {key:'dash', ico:'💣', lbl:'', dash:true, cover:'', title:'Mission Control', tip:'Mission control'},
-  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', cover:'', title:'Welcome Home', tip:'Everything that stays at camp', subs:[
-    {key:'supply',    lbl:'🧰 Supply',    art:'🧰', tip:'Shade, tools, water, camp life'},
-    {key:'equipment', lbl:'🔌 Equipment', art:'🔌', tip:'Big gear: generator, A/C, power, tanks'},
-    {key:'bike',      lbl:'🚲 Bike',      art:'🚲', tip:'Playa-proof bike and lights'},
+  {key:'dash', ico:'💣', k:'', dash:true, cover:'', tk:'tDash', tip:''},
+  {key:'camp', ico:'⛺', k:'camp', art:'⛺', cover:'', tk:'tCamp', tip:'', subs:[
+    {key:'supply',    k:'supply',    art:'🧰', tip:''},
+    {key:'equipment', k:'equipment', art:'🔌', tip:''},
+    {key:'bike',      k:'bike',      art:'🚲', tip:''},
   ]},
-  {key:'human',ico:'🧍', lbl:'Body', art:'🧍', cover:'', title:'Body Mastering', tip:'What you wear and carry', subs:[
-    {key:'day',      lbl:'☀️ Day',       art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
-    {key:'night',    lbl:'🌙 Night',     art:'🌙', tip:'Cold and dark — what you wear at night'},
-    {key:'firstaid', lbl:'🩹 First aid', art:'🩹', tip:'Meds and first aid — no pharmacy out there'},
+  {key:'human',ico:'🧍', k:'body', art:'🧍', cover:'', tk:'tBody', tip:'', subs:[
+    {key:'day',      k:'day',      art:'☀️', tip:''},
+    {key:'night',    k:'night',    art:'🌙', tip:''},
+    {key:'firstaid', k:'firstaid', art:'🩹', tip:''},
   ]},
-  {key:'food', ico:'🍉', lbl:'Food', art:'🍉', cover:'', title:'Life Support', tip:'Groceries, drinks, bar', subs:[
-    {key:'produce',  lbl:'🥬 Produce',  art:'🥬', tip:'Fresh food and groceries for the week'},
-    {key:'beverage', lbl:'🥤 Beverage', art:'🥤', tip:'Water and non-alcoholic drinks'},
-    {key:'alcohol',  lbl:'🍸 Alcohol',  art:'🍸', tip:'Bar stock — cans only, no glass on playa'},
+  {key:'food', ico:'🍉', k:'food', art:'🍉', cover:'', tk:'tFood', tip:'', subs:[
+    {key:'produce',  k:'produce',  art:'🥬', tip:''},
+    {key:'beverage', k:'beverage', art:'🥤', tip:''},
+    {key:'alcohol',  k:'alcohol',  art:'🍸', tip:''},
   ]},
 ];
-const STATUS=[['need','need'],['maybe','maybe'],['bought','got it']];
-const STATUS_LABEL=Object.fromEntries(STATUS);
+const STATUS=[['need','need'],['maybe','maybe'],['bought','bought']];
+const statusLabel=k=>t(k);
 const NEXT_STATUS={need:'maybe',maybe:'bought',bought:'need'};
 const COVER_DEFAULT="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 400' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b1d3f'/%3E%3Cstop offset='.45' stop-color='%238a3f2e'/%3E%3Cstop offset='.78' stop-color='%23d9803a'/%3E%3Cstop offset='1' stop-color='%23f0b566'/%3E%3C/linearGradient%3E%3CradialGradient id='glow' cx='.5' cy='.86' r='.55'%3E%3Cstop offset='0' stop-color='%23ffd79a' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%23ffd79a' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='1600' height='400' fill='url(%23sky)'/%3E%3Cellipse cx='800' cy='344' rx='560' ry='150' fill='url(%23glow)'/%3E%3Cg fill='%231b1210'%3E%3Crect x='0' y='344' width='1600' height='56'/%3E%3Cpath d='M742 344 h116 l-14-64 h-88 z'/%3E%3Cpath d='M770 280 h60 v-96 h-60 z'/%3E%3Cpath d='M800 184 m-16 0 a16 16 0 1 0 32 0 a16 16 0 1 0 -32 0'/%3E%3Cpath d='M784 214 L708 150 l14-16 l70 60 z'/%3E%3Cpath d='M816 214 L892 150 l-14-16 l-70 60 z'/%3E%3Cpath d='M756 344 l-10-38 h-16 l10 38 z'/%3E%3Cpath d='M844 344 l10-38 h16 l-10 38 z'/%3E%3C/g%3E%3Cg fill='%232a1c17' opacity='.85'%3E%3Cpath d='M300 344 l8-26 h6 l8 26 z'/%3E%3Cpath d='M1290 344 l7-22 h6 l7 22 z'/%3E%3Cpath d='M1120 344 q14-30 28 0 z'/%3E%3Cpath d='M470 344 q16-24 32 0 z'/%3E%3C/g%3E%3Cg stroke='%23ffd79a' stroke-opacity='.5' stroke-width='2' fill='none'%3E%3Cpath d='M742 300 h116'/%3E%3Cpath d='M754 262 h92'/%3E%3C/g%3E%3C/svg%3E";
 const secOf=k=>SECTIONS.find(x=>x.key===k);
+const lblOf=x=>x.k?t(x.k):'';
 const subOf=s=>(s&&s.subs)?s.subs:null;
 
 let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false, HAS_CLAIM=false, HAS_PROFILES=false;
@@ -803,16 +880,17 @@ function drawMenu(){
   const m=document.getElementById('menu'); if(!m) return;
   const acc = me()
     ? '<div class="who">Signed in as <b>'+esc(session.name)+'</b></div>'+
-      '<button onclick="closeMenu();signOut()"><span class="k">⏻</span>Sign out</button>'
-    : '<button onclick="closeMenu();openGate(\'in\')"><span class="k">→</span>Sign in</button>';
+      '<button onclick="closeMenu();signOut()"><span class="k">⏻</span>'+t('signout')+'</button>'
+    : '<button onclick="closeMenu();openGate(\'in\')"><span class="k">→</span>'+t('signin')+'</button>';
   m.innerHTML =
 
-    (me()&&HAS_PROFILES ? '<button onclick="closeMenu();openProfile()"><span class="k">☺</span>My profile</button>' : '')+
+    (me()&&HAS_PROFILES ? '<button onclick="closeMenu();openProfile()"><span class="k">☺</span>'+t('profile')+'</button>' : '')+
     '<div class="sep"></div>'+
-    '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>Refresh</button>'+
-    '<button onclick="closeMenu();doExport()"><span class="k">↑</span>Export backup</button>'+
-    '<button onclick="closeMenu();doImport()"><span class="k">↓</span>Import backup</button>'+
-    '<button onclick="closeMenu();doCSV()"><span class="k">▤</span>Download CSV</button>'+
+    '<button onclick="closeMenu();toggleLang()"><span class="k">🌐</span>'+t('language')+'</button>'+
+    '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>'+t('refresh')+'</button>'+
+    (canEdit()? '<button onclick="closeMenu();doExport()"><span class="k">↑</span>'+t('exportB')+'</button>' : '')+
+    (canEdit()? '<button onclick="closeMenu();doImport()"><span class="k">↓</span>'+t('importB')+'</button>' : '')+
+    '<button onclick="closeMenu();doCSV()"><span class="k">▤</span>'+t('csv')+'</button>'+
     '<div class="sep"></div>'+acc;
 }
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
@@ -843,7 +921,7 @@ function teamStats(real){
   const by={};
   real.forEach(i=>{
     const k=i.claimed_by||'__none';
-    if(!by[k]) by[k]={uid:i.claimed_by||null,name:i.claimed_name||'Unclaimed',n:0,got:0,spent:0,left:0};
+    if(!by[k]) by[k]={uid:i.claimed_by||null,name:i.claimed_name||t('unclaimed'),n:0,got:0,spent:0,left:0};
     const t=by[k]; t.n++;
     const v=money(i.price)*qnum(i);
     if(i.status==='bought'){ t.got++; t.spent+=v; }
@@ -862,24 +940,24 @@ function renderDash(host){
   h+='<div class="dhero">'+
      '<div class="ring" style="--pc:'+all.pc+';--ringc:'+barColor(all.pc)+'"><b>'+all.pc+'%</b></div>'+
      '<div class="txt">'+
-       '<b>Mission readiness</b>'+
-       '<span>'+all.got+' of '+all.total+' items handled · '+fmt(all.spent)+' spent</span>'+
-       '<div style="margin-top:10px;font-size:12.5px;color:var(--dim)">BURN DAY <b style="color:var(--accent2);font-size:20px;margin-left:6px">−'+days+'</b>'+
-         '<span style="margin-left:10px;letter-spacing:.08em;text-transform:uppercase;font-size:11px">status: '+(days>0?'preparing':'on playa')+'</span></div>'+
+       '<b>'+t('readiness')+'</b>'+
+       '<span>'+all.got+' / '+all.total+' '+t('handled')+' · '+fmt(all.spent)+'</span>'+
+       '<div style="margin-top:10px;font-size:12.5px;color:var(--dim)">'+t('burnday').toUpperCase()+' <b style="color:var(--accent2);font-size:20px;margin-left:6px">−'+days+'</b>'+
+         '<span style="margin-left:10px;letter-spacing:.08em;text-transform:uppercase;font-size:11px">'+(days>0?t('preparing'):t('onplaya'))+' · '+days+' '+t('daysLeft')+'</span></div>'+
      '</div></div>';
 
   h+='<div class="dtiles">'+
-    '<div class="dtile"><div class="k">Got it</div><div class="v">'+all.got+' / '+all.total+'</div>'+
-      '<div class="s">'+all.pc+'% of the list</div></div>'+
-    '<div class="dtile"><div class="k">Spent</div><div class="v">'+fmt(all.spent)+'</div>'+
-      '<div class="s">on '+all.got+' items</div></div>'+
-    '<div class="dtile"><div class="k">Still to buy</div><div class="v">'+fmt(all.left)+'</div>'+
-      '<div class="s">'+(all.total-all.got-all.maybe)+' marked need</div></div>'+
-    '<div class="dtile"><div class="k">Maybe</div><div class="v">'+fmt(all.maybeSum)+'</div>'+
-      '<div class="s">'+all.maybe+' undecided</div></div>'+
+    '<div class="dtile"><div class="k">'+t('gotit')+'</div><div class="v">'+all.got+' / '+all.total+'</div>'+
+      '<div class="s">'+all.pc+'% '+t('ofList')+'</div></div>'+
+    '<div class="dtile"><div class="k">'+t('spent')+'</div><div class="v">'+fmt(all.spent)+'</div>'+
+      '<div class="s">'+t('onItems')+' '+all.got+'</div></div>'+
+    '<div class="dtile"><div class="k">'+t('tobuy')+'</div><div class="v">'+fmt(all.left)+'</div>'+
+      '<div class="s">'+(all.total-all.got-all.maybe)+' '+t('markedNeed')+'</div></div>'+
+    '<div class="dtile"><div class="k">'+t('maybe')+'</div><div class="v">'+fmt(all.maybeSum)+'</div>'+
+      '<div class="s">'+all.maybe+' '+t('undecided')+'</div></div>'+
     '</div>';
 
-  h+='<p class="dhead">Team</p><div class="dsec">';
+  h+='<p class="dhead">'+t('team')+'</p><div class="dsec">';
   if(known.length){
     h+='<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--hair);margin-bottom:4px">';
     known.forEach(p=>{ h+=avatarHTML(p.user_id,p.name,'lg'); });
@@ -888,7 +966,7 @@ function renderDash(host){
   if(!HAS_CLAIM){
     h+='<p class="dnote">Turn on ownership to see who is buying what.</p>';
   }else if(team.length===1 && !team[0].uid){
-    h+='<p class="dnote">Nobody has claimed anything yet. Open the menu → <b>Select items…</b>, tick what you are buying and confirm.</p>';
+    h+='<p class="dnote">'+t('noClaims')+'</p>';
   }else{
     team.forEach(t=>{
       const pc=t.n?Math.round(t.got/t.n*100):0;
@@ -902,19 +980,19 @@ function renderDash(host){
   }
   h+='</div>';
 
-  h+='<p class="dhead">Progress by section</p><div class="pgrid">';
+  h+='<p class="dhead">'+t('progress')+'</p><div class="pgrid">';
   SECTIONS.filter(x=>!x.dash).forEach(sec=>{
     const list=real.filter(i=>i.section===sec.key);
     const st=statsFor(list);
     h+='<div class="pcard">'+
-      '<div class="phead"><span class="ico">'+sec.ico+'</span><b>'+sec.lbl+'</b>'+
+      '<div class="phead"><span class="ico">'+sec.ico+'</span><b>'+lblOf(sec)+'</b>'+
         '<span class="ppc">'+st.pc+'%</span></div>'+
       '<span class="bar sec"><i style="width:'+st.pc+'%"></i></span>'+
-      '<div class="psum">'+st.got+' of '+st.total+' handled · '+fmt(st.spent)+'</div>'+
+      '<div class="psum">'+st.got+' / '+st.total+' '+t('handled')+' · '+fmt(st.spent)+'</div>'+
       '<div class="psubs">';
     (sec.subs||[]).forEach(sb=>{
       const sl=list.filter(i=>i.sub===sb.key); const ss=statsFor(sl);
-      h+='<div class="drow"><span class="nm sub">'+sb.lbl.replace(/^\S+\s/,'')+'</span>'+
+      h+='<div class="drow"><span class="nm sub">'+lblOf(sb)+'</span>'+
         '<span class="bar thin"><i style="width:'+ss.pc+'%"></i></span>'+
         '<span class="pc">'+ss.got+'/'+ss.total+'</span></div>';
     });
@@ -922,9 +1000,9 @@ function renderDash(host){
   });
   h+='</div>';
 
-  h+='<p class="dhead">Needs attention</p><div class="dsec"><p class="dnote">'+
-    '<b>'+all.noPrice+'</b> items still have no price — you cannot budget what you have not priced.<br>'+
-    '<b>'+all.maybe+'</b> sit in maybe. Each one is a decision you are still carrying.'+
+  h+='<p class="dhead">'+t('attention')+'</p><div class="dsec"><p class="dnote">'+
+    '<b>'+all.noPrice+'</b> '+t('noPrice')+'<br>'+
+    '<b>'+all.maybe+'</b> '+t('inMaybe')+''+
     '</p></div>';
 
   h+='</div>';
@@ -932,20 +1010,22 @@ function renderDash(host){
 }
 function render(){
   document.body.classList.toggle('editing', mode==='edit');
+  const h1s=document.getElementById('h1sub'); if(h1s) h1s.textContent=' · '+t('inventory');
   const lb=document.getElementById('layoutbox');
   lb.innerHTML='<span class="viewtoggle">'+
     '<button class="'+(layout==="cards"?"on":"")+'" title="Cards" onclick="setLayout(\'cards\')">▦</button>'+
     '<button class="'+(layout==="list"?"on":"")+'" title="List" onclick="setLayout(\'list\')">☰</button>'+
     '</span>';
   const eb=document.getElementById('editbtn');
-  eb.textContent = mode==='edit' ? 'Done' : 'Edit';
+  eb.textContent = mode==='edit' ? t('done') : t('edit');
   eb.className = 'editbtn'+(mode==='edit'?' on':'');
+  eb.style.display = canEdit() ? '' : 'none';
 
 
   const nav=document.getElementById('nav'); nav.innerHTML='';
   SECTIONS.forEach(s=>{
     const d=document.createElement('div'); d.className='stab'+(s.dash?' dash':'')+(view.section===s.key?' active':'');
-    d.innerHTML=`<span class="ico">${s.ico}</span><span class="lbl">${s.lbl}</span>`;
+    d.innerHTML=`<span class="ico">${s.ico}</span><span class="lbl">${lblOf(s)}</span>`;
     d.onclick=()=>{view.section=s.key;render();};
     nav.appendChild(d);
   });
@@ -957,7 +1037,7 @@ function render(){
   if(subs){
     const wrap=document.createElement('div'); wrap.className='subtabs';
     subs.forEach(sb=>{
-      const b=document.createElement('button'); b.dataset.k=sb.key; b.textContent=sb.lbl;
+      const b=document.createElement('button'); b.dataset.k=sb.key; b.textContent=sb.art+' '+lblOf(sb);
       if(activeSub===sb.key) b.className='on';
       b.onclick=()=>{view.subs[view.section]=sb.key;render();}; wrap.appendChild(b);
     });
@@ -966,23 +1046,22 @@ function render(){
 
   const cov=document.getElementById('cover');
   if(cov) cov.innerHTML = `<img src="${s.cover||'./cover.jpg'}" alt="">`+
-    (s.title ? `<span class="covttl"><i>Burning Man</i><b>${s.title}</b></span>` : '');
+    (s.tk ? `<span class="covttl"><i>Burning Man</i><b>${t(s.tk)}</b></span>` : '');
 
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
   const bought=list.filter(i=>i.status==='bought').length;
-  let title=s.lbl, art=s.art, tip=s.tip;
+  let title=lblOf(s), art=s.art, tip='';
   if(subs){ const sb=subs.find(x=>x.key===activeSub);
-    if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); } }
-  const selBtn = !HAS_CLAIM ? ''
+    if(sb){ art=sb.art; title=lblOf(s)+' · '+lblOf(sb); } }
+  const selBtn = (!HAS_CLAIM || !canEdit()) ? `<span class="tip">${canEdit()?'':t('viewOnly')}</span>`
     : selectMode
-      ? `<button class="selbtn ghost" onclick="stopSelect()">✕ Cancel</button>`
-      : `<button class="selbtn" onclick="startSelect()">✓ I'm buying…</button>`;
-  const midText = selectMode ? '' : `<span class="ttl">${title}</span><span class="tip">${tip}</span>`;
+      ? `<button class="selbtn ghost" onclick="stopSelect()">${t('cancel')}</button>`
+      : `<button class="selbtn" onclick="startSelect()">${t('buying')}</button>`;
   const rightSide = selectMode
-    ? `<button class="selbtn go" id="selsave" onclick="applySelect()">Save${selected.size?' · '+selected.size:''}</button>`
-    : `<span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
-  document.getElementById('summary').innerHTML = selBtn + midText +
+    ? `<button class="selbtn go" id="selsave" onclick="applySelect()">${t('save')}${selected.size?' · '+selected.size:''}</button>`
+    : `<span class="nums"><b>${bought}/${list.length}</b> ${t('boughtTotal')} <b>$${sum.toFixed(0)}</b></span>`;
+  document.getElementById('summary').innerHTML = selBtn +
     `<span style="margin-left:auto">${rightSide}</span>`;
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
@@ -993,7 +1072,7 @@ function render(){
   grid.className='grid'+(layout==='list'?' list':'')+(mode==='edit'?' editmode':'');
   list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
   if(mode==='edit'){
-    const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
+    const add=document.createElement('div'); add.className='addcard'; add.textContent=t('addItem');
     add.onclick=()=>{const n={id:uid(),section:view.section,sub:curSub(),name:'',price:'',url:'',img:'',status:'need'};
       if(HAS_QTY)n.qty='1'; if(HAS_SORT)n.sort=Date.now()/1000; addItem(n);};
     grid.appendChild(add);
@@ -1010,7 +1089,7 @@ function render(){
 
 function photoHTML(it){
   return it.img ? `<div class="photo"><img src="${it.img}" alt=""></div>`
-                : `<div class="photo empty"><div class="ph"><b>＋</b>photo</div></div>`;
+                : `<div class="photo empty"><div class="ph"><b>＋</b>${t('photo')}</div></div>`;
 }
 
 function viewCard(it){
@@ -1025,7 +1104,7 @@ function viewCard(it){
       <div class="vname">${esc(it.name)||'<span style="color:var(--dim)">untitled</span>'}</div>
       <div class="vmeta">
         <span class="vprice">${it.price?'$'+esc(it.price):'<span style="color:var(--dim)">—</span>'}${q>1?` <span class="vqty">×${q}</span>`:''}</span>
-        <button class="pill ${it.status}" data-cycle="${it.id}" title="Tap to change">${STATUS_LABEL[it.status]||it.status}</button>
+        <${canEdit()?'button':'span'} class="pill ${it.status}"${canEdit()?` data-cycle="${it.id}"`:''}>${statusLabel(it.status)}</${canEdit()?'button':'span'}>
       </div>
     </div>
     <div class="cfoot">
@@ -1061,19 +1140,19 @@ function editCard(it){
     ${HAS_SORT?`<div class="grip" data-grip="${it.id}">⠿</div>`:''}
     <div data-img="${it.id}" style="cursor:pointer">${photoHTML(it)}</div>
     <div class="ebody">
-      <input class="ename" placeholder="Item name" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
+      <input class="ename" placeholder="${t('itemName')}" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
       <div class="rowline">
         <div class="price"><input placeholder="0" inputmode="decimal" value="${esc(it.price)}" data-f="price" data-id="${it.id}"></div>
         ${HAS_QTY?`<div class="qty"><input placeholder="1" inputmode="numeric" value="${esc(it.qty==null||it.qty==='1'?'':it.qty)}" data-f="qty" data-id="${it.id}"></div>`:''}
       </div>
       <select data-f="status" data-id="${it.id}">
-        ${STATUS.map(s=>`<option value="${s[0]}" ${it.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}
+        ${STATUS.map(x=>`<option value="${x[0]}" ${it.status===x[0]?'selected':''}>${statusLabel(x[0])}</option>`).join('')}
       </select>
-      <select data-move="${it.id}" title="Move to another section">
+      <select data-move="${it.id}" title="${t('moveTo')}">
         ${moveOptions(it)}
       </select>
-      <input placeholder="link" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
-      <button class="delbtn" data-del="${it.id}">Delete</button>
+      <input placeholder="${t('link')}" inputmode="url" value="${esc(it.url)}" data-f="url" data-id="${it.id}">
+      <button class="delbtn" data-del="${it.id}">${t('del')}</button>
     </div>`;
   return c;
 }
@@ -1226,7 +1305,7 @@ function askDelete(id){
 function showUndo(label){
   hideUndo(true);
   const t=document.createElement('div'); t.className='toast'; t.id='toast';
-  t.innerHTML='<span>Deleted “'+esc(label)+'”</span><button type="button" id="undobtn">Undo</button>';
+  t.innerHTML='<span>'+I18N[LANG].deleted+' “'+esc(label)+'”</span><button type="button" id="undobtn">'+I18N[LANG].undo+'</button>';
   document.body.appendChild(t);
   document.getElementById('undobtn').onclick=undoDelete;
   undoTimer=setTimeout(()=>{undoItem=null;hideUndo();},12000);
@@ -1274,16 +1353,16 @@ function openProfile(){
   avatarData=p.avatar||'';
   const host=document.getElementById('sheet');
   host.innerHTML='<div class="sheetbg" id="sheetbg"><div class="sheet">'+
-    '<div class="shead"><b>My profile</b><button onclick="closeSheet()">✕</button></div>'+
+    '<div class="shead"><b>'+t('myProfile')+'</b><button onclick="closeSheet()">✕</button></div>'+
     '<div class="slist" style="align-items:center;gap:14px">'+
       '<div id="avprev" style="cursor:pointer">'+avatarHTML(session.user_id,session.name,'lg')+'</div>'+
-      '<button onclick="pickAvatar()">Choose photo</button>'+
-      '<input id="pname" placeholder="Your name" value="'+esc((p.name||session.name||''))+'" '+
+      '<button onclick="pickAvatar()">'+t('choosePhoto')+'</button>'+
+      '<input id="pname" placeholder="'+t('yourName')+'" value="'+esc((p.name||session.name||''))+'" '+
         'style="background:var(--field);border:1px solid var(--field-line);color:var(--text);'+
         'border-radius:9px;padding:9px 11px;font:inherit;width:100%;max-width:280px">'+
-      '<p class="empty-note" style="padding:0">Your face shows up on everything you take on.</p>'+
+      '<p class="empty-note" style="padding:0">'+t('profileHint')+'</p>'+
     '</div>'+
-    '<div class="sfoot"><span style="flex:1"></span><button onclick="saveProfile()">Save</button></div>'+
+    '<div class="sfoot"><span style="flex:1"></span><button onclick="saveProfile()">'+t('save')+'</button></div>'+
   '</div></div>';
   document.getElementById('sheetbg').addEventListener('click',e=>{ if(e.target.id==='sheetbg') closeSheet(); });
   document.getElementById('avprev').onclick=pickAvatar;
@@ -1304,9 +1383,9 @@ const MAXLEN=280;
 function when(ts){
   const d=Date.parse(ts); if(isNaN(d)) return '';
   const m=Math.floor((Date.now()-d)/60000);
-  if(m<1) return 'just now'; if(m<60) return m+'m ago';
-  const h=Math.floor(m/60); if(h<24) return h+'h ago';
-  return Math.floor(h/24)+'d ago';
+  if(m<1) return t('justNow'); if(m<60) return m+t('mAgo');
+  const h=Math.floor(m/60); if(h<24) return h+t('hAgo');
+  return Math.floor(h/24)+t('dAgo');
 }
 let sheetItem=null, sheetRows=[], sheetLikes={}, myLikes={}, editingId=null;
 
@@ -1330,15 +1409,15 @@ function closeSheet(){ document.getElementById('sheet').innerHTML=''; sheetItem=
 function drawComposer(){
   const c=document.getElementById('composer'); if(!c) return;
   if(!me()){
-    c.innerHTML='<div class="whoami">Sign in to leave a note <button onclick="closeSheet();openGate(\'in\')">Sign in</button></div>';
+    c.innerHTML='<div class="whoami">'+t('signinNote')+' <button onclick="closeSheet();openGate(\'in\')">Sign in</button></div>';
     return;
   }
   c.innerHTML=`
-    <div class="whoami">Posting as <b>${esc(session.name)}</b>${editingId?' · editing':''}</div>
+    <div class="whoami">${t('postingAs')} <b>${esc(session.name)}</b>${editingId?' · editing':''}</div>
     <div class="counter" id="counter">0 / ${MAXLEN}</div>
     <div class="sfoot">
-      <textarea id="cbody" maxlength="${MAXLEN}" placeholder="Where to buy, size, who is bringing it…"></textarea>
-      <button onclick="sendComment()" id="postbtn">${editingId?'Save':'Post'}</button>
+      <textarea id="cbody" maxlength="${MAXLEN}" placeholder="${t('addNote')}"></textarea>
+      <button onclick="sendComment()" id="postbtn">${editingId?t('save'):t('post')}</button>
     </div>`;
   const ta=document.getElementById('cbody');
   ta.addEventListener('input',()=>{
@@ -1366,14 +1445,14 @@ async function loadComments(){
       const mine=me()&&r.user_id===session.user_id;
       const n=sheetLikes[r.id]||0, liked=!!myLikes[r.id];
       return `<div class="cmt">
-        <div class="who">${esc(r.author||'anon')}<i>${when(r.created_at)}${r.edited_at?' · edited':''}</i></div>
+        <div class="who">${esc(r.author||'anon')}<i>${when(r.created_at)}${r.edited_at?' · '+t('edited'):''}</i></div>
         <div class="body">${esc(r.body)}</div>
         <div class="row">
           <button class="${liked?'liked':''}" onclick="toggleLike('${r.id}')">${liked?'♥':'♡'} ${n||''}</button>
           <span class="grow"></span>
           ${mine?`<button onclick="editComment('${r.id}')">edit</button><button onclick="removeComment('${r.id}')">delete</button>`:''}
         </div></div>`;
-    }).join('') : '<div class="empty-note">No notes yet. Add the first one.</div>';
+    }).join('') : '<div class="empty-note">'+t('noNotes')+'</div>';
     box.scrollTop=box.scrollHeight;
   }catch(e){ box.innerHTML='<div class="empty-note">Notes are not set up yet.</div>'; }
 }
@@ -1490,12 +1569,15 @@ function openGate(tab){
     if(p.length<6){ setErr('Password: at least 6 characters'); return; }
     if(signup && n.length<2){ setErr('Pick a display name'); return; }
     setErr('…');
-    try{ signup ? await signUp(e,p,n) : await signIn(e,p); closeGate(); }
+    try{ signup ? await signUp(e,p,n) : await signIn(e,p);
+         view.section='dash'; layout='list';
+         try{ localStorage.setItem('bm-layout','list'); localStorage.setItem('bm-theme','light'); }catch(x){}
+         applyTheme(); mode='view'; closeGate(); }
     catch(err){ setErr(friendly(err.message)); }
   });
 }
 function closeGate(){ document.getElementById('gate').innerHTML=''; try{localStorage.setItem('bm-seen','1');}catch(e){} render(); }
-function signOut(){ clearSession(); render(); }
+function signOut(){ clearSession(); selectMode=false; mode='view'; render(); openGate('in'); }
 
 /* ---------- export / import / csv ---------- */
 function doExport(){ dl(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}),'burning-man-2026.json'); }
@@ -1516,7 +1598,7 @@ document.getElementById('filejson').addEventListener('change',function(e){
   r.readAsText(f); e.target.value='';
 });
 function doCSV(){
-  const map=Object.fromEntries(STATUS); const secn={camp:'Camp',bike:'Bike',human:'Body',food:'Food'};
+  const map={need:'need',maybe:'maybe',bought:'got it'}; const secn={camp:'Camp',bike:'Bike',human:'Body',food:'Food'};
   let rows=[['Section','Subsection','Item','Qty','Price $','Link','Status']];
   items.forEach(i=>rows.push([secn[i.section]||i.section,i.sub||'',i.name,qnum(i),i.price,i.url,map[i.status]||i.status]));
   const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
