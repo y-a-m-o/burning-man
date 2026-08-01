@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burning Man 2026 — Inventory</title>
+<title>BM40 · 2026 — Inventory</title>
 <style>
   :root{
     --radius:14px; --joint:12px;
@@ -361,6 +361,8 @@
   .bulkbar .go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
   /* mission control */
   .dash{display:flex;flex-direction:column;gap:12px;padding:12px 0 4px}
+  .donboard{margin:0;font-size:13px;line-height:1.6;color:var(--dim);background:var(--subon);
+    border-radius:11px;padding:12px 14px}
   .dcount{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
     background:var(--subon);border-radius:12px;padding:14px 16px}
   .dcount b{font-size:34px;font-weight:600;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1}
@@ -488,7 +490,7 @@
 <body>
 <header><div class="hwrap">
   <div class="htop">
-    <h1>🔥 <b>BM 2026</b><span id="h1sub"></span></h1>
+    <h1>🔥 <b>BM40 · 2026</b><span id="h1sub"></span></h1>
     <span class="dot" id="cloud" title="…"></span>
     <span class="spacer"></span>
     <span id="layoutbox"></span>
@@ -558,7 +560,8 @@ const I18N={
     browse:'Just browse', forgot:'Forgot password?', email:'Email', password:'Password',
     dname:'Display name', myProfile:'My profile', choosePhoto:'Choose photo',
     yourName:'Your name', profileHint:'Your face shows up on everything you take on.',
-    daysLeft:'days until the gate opens'
+    daysLeft:'days until the gate opens',
+    onboard:'Everything the camp needs lives here. Poke around, mark what you are buying, add what we forgot — and delete whatever seemed brilliant at 3am.'
   },
   uk:{
     inventory:'Інвентар', edit:'Редагувати', done:'Готово',
@@ -569,10 +572,10 @@ const I18N={
     camp:'Табір', body:'Тіло', food:'Їжа',
     supply:'Спорядження', equipment:'Техніка', bike:'Велосипед',
     day:'День', night:'Ніч', firstaid:'Аптечка',
-    produce:'Продукти', beverage:'Напої', alcohol:'Алкоголь',
-    tCamp:'Ласкаво просимо додому', tBody:'Володіння тілом', tFood:'Життєзабезпечення', tDash:'Центр керування',
+    produce:'Продукти', beverage:'Напої', alcohol:'Смаколики',
+    tCamp:'Ласкаво просимо додому', tBody:'Володіння тілом', tFood:'Життєвий запас', tDash:'Центр керування',
     readiness:'Готовність місії', burnday:'День спалення', preparing:'готуємось', onplaya:'на плаї',
-    handled:'закрито', gotit:'Є', spent:'Витрачено', tobuy:'Ще купити', undecided:'нерозв’язаних',
+    handled:'закрито', gotit:'Є', spent:'Витрачено', tobuy:'Ще купити', undecided:'без рішення',
     ofList:'списку', onItems:'на', markedNeed:'позначено «треба»',
     team:'Команда', progress:'Прогрес за розділами', attention:'Потребує уваги',
     noClaims:'Поки що ніхто нічого не взяв. Натисни «Я купую…» у розділі й познач своє.',
@@ -589,7 +592,8 @@ const I18N={
     browse:'Просто подивитись', forgot:'Забув пароль?', email:'Пошта', password:'Пароль',
     dname:'Ім’я для команди', myProfile:'Мій профіль', choosePhoto:'Обрати фото',
     yourName:'Твоє ім’я', profileHint:'Твоє фото з’являється на всьому, що ти береш на себе.',
-    daysLeft:'днів до відкриття воріт'
+    daysLeft:'днів до відкриття воріт',
+    onboard:'Усе, що потрібно табору, тут. Тицяй, познач, що береш на себе, додай забуте — і видали те, що здавалося геніальним о третій ночі.'
   }
 };
 let LANG=(function(){ try{ return localStorage.getItem('bm-lang')||'en'; }catch(e){ return 'en'; } })();
@@ -840,13 +844,13 @@ function onScroll(){
   if(d<0){                                  // вверх — показываем сразу
     if(acc>0) acc=0;
     acc+=d;
-    if(acc<-12) setNav(false);
+    if(acc<-10) setNav(false);
     return;
   }
   if(Date.now()<lock){ acc=0; return; }     // пауза нужна только для скрытия
   if(acc<0) acc=0;
   acc+=d;
-  if(acc>44){ pinned=false; setNav(true); }
+  if(y>140 && acc>18){ pinned=false; setNav(true); }
 }
 window.addEventListener('scroll',()=>{ if(!navTick){ navTick=true; requestAnimationFrame(onScroll); } },{passive:true});
 /* тема: по умолчанию как в системе, переключатель перебивает */
@@ -936,6 +940,7 @@ function renderDash(host){
   const team=teamStats(real);
   const known=Object.values(PROFILES);
   let h='<div class="dash">';
+  h+='<p class="donboard">'+t('onboard')+'</p>';
 
   h+='<div class="dhero">'+
      '<div class="ring" style="--pc:'+all.pc+';--ringc:'+barColor(all.pc)+'"><b>'+all.pc+'%</b></div>'+
@@ -1046,7 +1051,7 @@ function render(){
 
   const cov=document.getElementById('cover');
   if(cov) cov.innerHTML = `<img src="${s.cover||'./cover.jpg'}" alt="">`+
-    (s.tk ? `<span class="covttl"><i>Burning Man</i><b>${t(s.tk)}</b></span>` : '');
+    (s.tk ? `<span class="covttl"><i>BM40 · 2026</i><b>${t(s.tk)}</b></span>` : '');
 
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
