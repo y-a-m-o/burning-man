@@ -407,6 +407,8 @@
   .dhero .txt{min-width:0}
   .dhero .txt b{font-size:15px;display:block}
   .dhero .txt span{font-size:12.5px;color:var(--dim)}
+  .dwhen{display:flex;flex-wrap:wrap;gap:14px;margin-top:9px;font-size:12px;color:var(--dim)}
+  .dwhen b{color:var(--accent2);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
   .team{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hair)}
   .team:last-child{border-bottom:0}
   .team .who{font-size:13.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -542,7 +544,7 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 const I18N={
   en:{
     inventory:'Inventory', edit:'Edit', done:'Done',
-    refresh:'Refresh', exportB:'Export backup', importB:'Import backup', csv:'Download CSV',
+    refresh:'Refresh', exportB:'Export backup', importB:'Import backup', csv:'Download CSV', pdf:'Print list (PDF)', pdfTitle:'Printable checklist', pdfAll:'All sections', pdfPhotos:'With photos', pdfMake:'Download PDF', pdfWait:'Building…',
     signin:'Sign in', signout:'Sign out', profile:'My profile', language:'Українська',
     buying:"✓ I'm buying…", cancel:'✕ Cancel', save:'Save',
     boughtTotal:'bought · total', need:'need', maybe:'maybe', bought:'got it',
@@ -551,7 +553,7 @@ const I18N={
     day:'Day', night:'Night', firstaid:'First aid',
     produce:'Produce', beverage:'Beverage', alcohol:'Delights',
     tCamp:'Welcome Home', tBody:'Body Mastering', tFood:'Life Support', tDash:'Mission Control',
-    readiness:'Mission readiness', burnday:'Burn day', preparing:'preparing', onplaya:'on playa',
+    readiness:'Mission readiness', gateIn:'Gate opens in', burnIn:'The Man burns in', days:'days', preparing:'preparing', onplaya:'on playa',
     handled:'handled', gotit:'Got it', spent:'Spent', tobuy:'Still to buy', undecided:'undecided',
     ofList:'of the list', onItems:'on', markedNeed:'marked need',
     team:'Team', progress:'Progress by section', attention:'Needs attention',
@@ -574,7 +576,7 @@ const I18N={
   },
   uk:{
     inventory:'Інвентар', edit:'Редагувати', done:'Готово',
-    refresh:'Оновити', exportB:'Експорт копії', importB:'Імпорт копії', csv:'Завантажити CSV',
+    refresh:'Оновити', exportB:'Експорт копії', importB:'Імпорт копії', csv:'Завантажити CSV', pdf:'Список для друку (PDF)', pdfTitle:'Список для друку', pdfAll:'Усі розділи', pdfPhotos:'З фото', pdfMake:'Завантажити PDF', pdfWait:'Готую…',
     signin:'Увійти', signout:'Вийти', profile:'Мій профіль', language:'English',
     buying:'✓ Я купую…', cancel:'✕ Скасувати', save:'Зберегти',
     boughtTotal:'куплено · разом', need:'треба', maybe:'можливо', bought:'є',
@@ -583,7 +585,7 @@ const I18N={
     day:'День', night:'Ніч', firstaid:'Аптечка',
     produce:'Продукти', beverage:'Напої', alcohol:'Смаколики',
     tCamp:'Ласкаво просимо додому', tBody:'Володіння тілом', tFood:'Життєвий запас', tDash:'Центр керування',
-    readiness:'Готовність місії', burnday:'День спалення', preparing:'готуємось', onplaya:'на плаї',
+    readiness:'Готовність місії', gateIn:'Ворота відчиняться через', burnIn:'Мена спалять через', days:'днів', preparing:'готуємось', onplaya:'на плаї',
     handled:'закрито', gotit:'Є', spent:'Витрачено', tobuy:'Ще купити', undecided:'без рішення',
     ofList:'списку', onItems:'на', markedNeed:'позначено «треба»',
     team:'Команда', progress:'Прогрес за розділами', attention:'Потребує уваги',
@@ -903,7 +905,7 @@ function drawMenu(){
     '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>'+t('refresh')+'</button>'+
     (canEdit()? '<button onclick="closeMenu();doExport()"><span class="k">↑</span>'+t('exportB')+'</button>' : '')+
     (canEdit()? '<button onclick="closeMenu();doImport()"><span class="k">↓</span>'+t('importB')+'</button>' : '')+
-    '<button onclick="closeMenu();doCSV()"><span class="k">▤</span>'+t('csv')+'</button>'+
+    '<button onclick="closeMenu();openPdf()"><span class="k">▤</span>'+t('pdf')+'</button>'+
     '<div class="sep"></div>'+acc;
 }
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
@@ -920,9 +922,11 @@ function statsFor(list){
   const noPrice=list.filter(i=>i.status!=='bought' && !money(i.price)).length;
   return {total,got,maybe,spent,left,maybeSum,noPrice,pc: total?Math.round(got/total*100):0};
 }
-function daysToBurn(){
-  const gate=new Date(2026,7,30);
-  return Math.max(0, Math.ceil((gate-new Date())/86400000));
+function daysToBurn(){                  // ворота открываются 30 августа
+  return Math.max(0, Math.ceil((new Date(2026,7,30)-new Date())/86400000));
+}
+function daysToMan(){                   // Мена сжигают 5 сентября
+  return Math.max(0, Math.ceil((new Date(2026,8,5)-new Date())/86400000));
 }
 function barColor(pc){
   return pc>=67 ? 'var(--good)' : (pc>=34 ? 'var(--warn)' : 'var(--danger)');
@@ -946,6 +950,7 @@ function renderDash(host){
   const real=items.filter(i=>i.section!=='dash');
   const all=statsFor(real);
   const days=daysToBurn();
+  const burnDays=daysToMan();
   const team=teamStats(real);
   const known=Object.values(PROFILES);
   let h='<div class="dash">';
@@ -956,10 +961,11 @@ function renderDash(host){
      '<div class="txt">'+
        '<b>'+t('readiness')+'</b>'+
        '<span>'+all.got+' / '+all.total+' '+t('handled')+' · '+fmt(all.spent)+'</span>'+
-       '<div style="margin-top:10px;font-size:12.5px;color:var(--dim)">'+t('burnday').toUpperCase()+' <b style="color:var(--accent2);font-size:20px;margin-left:6px">−'+days+'</b>'+
-         '<span style="margin-left:10px;letter-spacing:.08em;text-transform:uppercase;font-size:11px">'+(days>0?t('preparing'):t('onplaya'))+' · '+days+' '+t('daysLeft')+'</span></div>'+
+       '<div class="dwhen">'+
+         '<span>'+t('gateIn')+' <b>'+days+'</b> '+t('days')+'</span>'+
+         '<span>'+t('burnIn')+' <b>'+burnDays+'</b> '+t('days')+'</span>'+
+       '</div>'+
      '</div></div>';
-
   h+='<div class="dtiles">'+
     '<div class="dtile"><div class="k">'+t('gotit')+'</div><div class="v">'+all.got+' / '+all.total+'</div>'+
       '<div class="s">'+all.pc+'% '+t('ofList')+'</div></div>'+
@@ -1082,7 +1088,10 @@ function render(){
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
   if(s.dash){ grid.className=''; renderDash(grid);
-    document.getElementById('summary').innerHTML='';
+    const dAll=statsFor(items.filter(i=>i.section!=='dash'));
+    document.getElementById('summary').innerHTML=
+      '<span class="nums" style="margin-left:0"><b>'+dAll.pc+'%</b> '+t('readiness').toLowerCase()+'</span>'+
+      '<span class="nums" style="margin-left:auto">'+t('gateIn').toLowerCase()+' <b>'+daysToBurn()+'</b> '+t('days')+'</span>';
     document.getElementById('donebar').innerHTML=''; return; }
   grid.className='grid'+(layout==='list'?' list':'')+(mode==='edit'?' editmode':'');
   list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
@@ -1604,6 +1613,109 @@ function openGate(tab){
 }
 function closeGate(){ document.getElementById('gate').innerHTML=''; try{localStorage.setItem('bm-seen','1');}catch(e){} render(); }
 function signOut(){ clearSession(); selectMode=false; mode='view'; render(); openGate('in'); }
+
+/* ---------- список для печати (PDF) ---------- */
+function pdfScopes(){
+  const out=[{v:'all',label:t('pdfAll')}];
+  SECTIONS.filter(x=>!x.dash).forEach(sec=>{
+    out.push({v:sec.key,label:lblOf(sec)});
+    (sec.subs||[]).forEach(sb=>out.push({v:sec.key+'/'+sb.key,label:'   '+lblOf(sec)+' · '+lblOf(sb)}));
+  });
+  return out;
+}
+function openPdf(){
+  const cur = view.section==='dash' ? 'all' : (curSub()? view.section+'/'+curSub() : view.section);
+  const host=document.getElementById('sheet');
+  host.innerHTML='<div class="sheetbg" id="sheetbg"><div class="sheet">'+
+    '<div class="shead"><b>'+t('pdfTitle')+'</b><button onclick="closeSheet()">✕</button></div>'+
+    '<div class="slist" style="gap:12px">'+
+      '<select id="pdfScope" style="background:var(--field);border:1px solid var(--field-line);color:var(--text);border-radius:9px;padding:9px 11px;font:inherit;width:100%">'+
+        pdfScopes().map(o=>'<option value="'+o.v+'" '+(o.v===cur?'selected':'')+'>'+esc(o.label)+'</option>').join('')+
+      '</select>'+
+      '<label style="display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer">'+
+        '<input type="checkbox" id="pdfPhotos" checked style="width:18px;height:18px"> '+t('pdfPhotos')+'</label>'+
+    '</div>'+
+    '<div class="sfoot"><span style="flex:1"></span><button id="pdfGo" onclick="makePdf()">'+t('pdfMake')+'</button></div>'+
+  '</div></div>';
+  document.getElementById('sheetbg').addEventListener('click',e=>{ if(e.target.id==='sheetbg') closeSheet(); });
+}
+function loadPdfLib(){
+  return new Promise((ok,fail)=>{
+    if(window.PDFLib) return ok(window.PDFLib);
+    const sc=document.createElement('script');
+    sc.src='https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+    sc.onload=()=>ok(window.PDFLib); sc.onerror=()=>fail(new Error('pdf-lib'));
+    document.head.appendChild(sc);
+  });
+}
+async function makePdf(){
+  const btn=document.getElementById('pdfGo'); btn.textContent=t('pdfWait'); btn.disabled=true;
+  try{
+    const scope=document.getElementById('pdfScope').value;
+    const withPhotos=document.getElementById('pdfPhotos').checked;
+    const L=await loadPdfLib();
+    const doc=await L.PDFDocument.create();
+    const font=await doc.embedFont(L.StandardFonts.Helvetica);
+    const bold=await doc.embedFont(L.StandardFonts.HelveticaBold);
+    const form=doc.getForm();
+    const A4=[595.28,841.89]; const M=40;
+    let page=doc.addPage(A4); let y=A4[1]-M; let n=0;
+    const rowH = withPhotos ? 46 : 26;
+    const newPage=()=>{ page=doc.addPage(A4); y=A4[1]-M; };
+    const head=(txt)=>{
+      if(y<M+70) newPage();
+      page.drawText(txt,{x:M,y:y-14,size:13,font:bold,color:L.rgb(.15,.11,.07)});
+      page.drawLine({start:{x:M,y:y-20},end:{x:A4[0]-M,y:y-20},thickness:.7,color:L.rgb(.75,.7,.62)});
+      y-=32;
+    };
+    page.drawText('BM40 · 2026 — packing list',{x:M,y:y-18,size:18,font:bold,color:L.rgb(.15,.11,.07)});
+    page.drawText(new Date().toLocaleDateString('en-US'),{x:M,y:y-34,size:9,font,color:L.rgb(.5,.45,.4)});
+    y-=58;
+    const groups=[];
+    SECTIONS.filter(x=>!x.dash).forEach(sec=>{
+      (sec.subs||[null]).forEach(sb=>{
+        const key = sb ? sec.key+'/'+sb.key : sec.key;
+        if(scope!=='all' && scope!==key && scope!==sec.key) return;
+        const list=items.filter(i=>i.section===sec.key && (!sb || i.sub===sb.key));
+        if(list.length) groups.push({title: lblOf(sec)+(sb?' · '+lblOf(sb):''), list});
+      });
+    });
+    for(const g of groups){
+      head(g.title);
+      for(const it of g.list){
+        if(y < M+rowH+6) newPage();
+        const cb=form.createCheckBox('i'+(n++));
+        cb.addToPage(page,{x:M,y:y-14,width:13,height:13,borderWidth:1,
+          borderColor:L.rgb(.6,.55,.5),backgroundColor:L.rgb(1,1,1)});
+        if(it.status==='bought') cb.check();
+        let tx=M+22;
+        if(withPhotos && it.img){
+          try{
+            const bytes=Uint8Array.from(atob(it.img.split(',')[1]),c=>c.charCodeAt(0));
+            const im= it.img.indexOf('image/png')>0 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+            page.drawImage(im,{x:tx,y:y-38,width:36,height:36});
+            tx+=44;
+          }catch(e){}
+        }
+        const q=qnum(it)>1 ? ' ×'+qnum(it) : '';
+        const name=(it.name||'').slice(0,58)+q;
+        page.drawText(name,{x:tx,y:y-12,size:10.5,font,color:L.rgb(.12,.1,.08)});
+        const price=it.price? '$'+it.price : '';
+        if(price) page.drawText(price,{x:A4[0]-M-92,y:y-12,size:10.5,font:bold,color:L.rgb(.12,.1,.08)});
+        page.drawText(it.status==='bought'?'got it':(it.status==='maybe'?'maybe':'need'),
+          {x:A4[0]-M-46,y:y-12,size:8.5,font,color:L.rgb(.45,.4,.35)});
+        page.drawLine({start:{x:M,y:y-rowH+6},end:{x:A4[0]-M,y:y-rowH+6},thickness:.4,color:L.rgb(.88,.85,.8)});
+        y-=rowH;
+      }
+      y-=10;
+    }
+    const bytes=await doc.save();
+    dl(new Blob([bytes],{type:'application/pdf'}),'BM40-2026-packing-list.pdf');
+    closeSheet();
+  }catch(e){
+    alert('PDF: '+(e.message||e)); btn.textContent=t('pdfMake'); btn.disabled=false;
+  }
+}
 
 /* ---------- export / import / csv ---------- */
 function doExport(){ dl(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}),'burning-man-2026.json'); }
