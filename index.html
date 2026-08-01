@@ -17,56 +17,66 @@
     color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     -webkit-font-smoothing:antialiased;padding-bottom:96px}
   body.editing{padding-bottom:110px}
-  header{position:sticky;top:0;z-index:20;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-    background:linear-gradient(#0f0d0bee,#0f0d0baa);border-bottom:1px solid var(--line);padding:12px 0}
+  /* ---- компактная шапка ---- */
+  header{position:sticky;top:0;z-index:20;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    background:linear-gradient(#0f0d0bf2,#0f0d0bd9);border-bottom:0;padding:10px 0 0}
+  .htop{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0}
+  h1{font-size:15px;margin:0;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  h1 b{font-weight:600}
+  h1 span{color:var(--accent);font-weight:400}
+  @media(max-width:620px){ h1 span{display:none} }
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--good);
+    box-shadow:0 0 7px var(--good);transition:.2s}
+  .dot.off{background:var(--warn);box-shadow:0 0 7px var(--warn)}
+  .editbtn{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600;
+    padding:7px 15px;font-size:13px;flex:0 0 auto}
+  .editbtn.on{background:var(--good);border-color:var(--good)}
+  .collapse{flex:0 0 auto;padding:6px 9px;font-size:11px;color:var(--dim);line-height:1;transition:transform .2s}
+  body.navcollapsed .collapse{transform:rotate(-90deg)}
+  #userbox button{padding:6px 10px;font-size:12px}
+  #layoutbox .viewtoggle button{padding:6px 9px;font-size:12px}
+
+  /* ---- папка раздела ---- */
+  nav.sections{display:flex;gap:5px;margin-top:10px}
+  nav.sections .stab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 6px;
+    background:transparent;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;
+    cursor:pointer;transition:.15s;position:relative;min-width:0}
+  nav.sections .stab .ico{font-size:16px;line-height:1}
+  nav.sections .stab .lbl{font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  nav.sections .stab:hover .lbl{color:var(--text)}
+  nav.sections .stab.active{background:#241b12;border-color:#5c4527;z-index:3;margin-bottom:-1px;padding-bottom:10px}
+  nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
+
+  .folder{background:#241b12;border:1px solid #5c4527;border-top:0;border-radius:0 0 14px 14px;
+    position:relative;z-index:2;overflow:hidden}
+  body.navcollapsed nav.sections{display:none}
+  body.navcollapsed #sub{display:none}
+  body.navcollapsed .folder{border-top:1px solid #5c4527;border-radius:14px;margin-top:10px}
+  #sub:not(:empty){padding:8px 8px 0}
+  .subtabs{display:flex;gap:5px;margin:0}
+  .subtabs button{flex:1;padding:8px 6px;border-radius:9px;background:#191209;border-color:#4a3a2a;
+    font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .subtabs button.on{border-color:var(--accent);color:var(--accent2);background:#33260f}
+  .subtabs button.on[data-k="night"]{border-color:var(--night);color:#a9bcff;background:#1b1f33}
+
+  /* ---- сводка ---- */
+  #summary{display:flex;align-items:center;gap:9px;padding:9px 12px;min-width:0}
+  #summary .art{font-size:19px;line-height:1;flex:0 0 auto}
+  #summary .ttl{font-size:14px;font-weight:600;white-space:nowrap}
+  #summary .tip{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+  #summary .nums{margin-left:auto;flex:0 0 auto;font-size:12.5px;color:var(--dim);white-space:nowrap}
+  #summary .nums b{color:var(--accent2);font-size:14px;font-variant-numeric:tabular-nums}
+  @media(max-width:620px){ #summary .tip{display:none} }
   .hwrap{max-width:1280px;margin:0 auto;padding:0 16px}
-  .htop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  h1{font-size:17px;margin:0;letter-spacing:.3px;white-space:nowrap}
-  h1 span{color:var(--accent)}
-  .cloud{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
-  .cloud.on{color:var(--good);border-color:#2f5b3a}
-  .cloud.off{color:var(--warn);border-color:#5b4a2f}
+  .wrap{max-width:1280px;margin:0 auto;padding:16px}
   .spacer{flex:1}
   button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);
     padding:8px 12px;border-radius:10px;transition:.15s;white-space:nowrap}
   button:hover{border-color:var(--accent);color:var(--accent2)}
   button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .editbtn{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600;padding:9px 18px;font-size:14px}
-  .editbtn:hover{background:var(--accent2);color:#1a0f06}
-  .editbtn.on{background:var(--good);border-color:var(--good)}
   .tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
   .tools button{padding:6px 10px;font-size:12.5px}
   .tip{color:var(--dim);font-size:12px;margin:8px 0 0}
-
-  nav.sections{display:flex;gap:6px;margin-top:12px}
-  nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;
-    background:var(--panel2);border:1px solid var(--line);border-radius:12px 12px 0 0;cursor:pointer;
-    transition:.15s;position:relative;margin-bottom:0}
-  nav.sections .stab .ico{font-size:24px;line-height:1}
-  nav.sections .stab .lbl{font-size:13px;color:var(--dim)}
-  nav.sections .stab.active{border-color:var(--accent);background:#2a1f14;border-bottom-color:#2a1f14;z-index:3;margin-bottom:-1px}
-  nav.sections .stab:not(.active){border-bottom-color:var(--accent);opacity:.85}
-  nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
-
-  .wrap{max-width:1280px;margin:0 auto;padding:16px}
-  .tabpanel{background:#2a1f14;border:1px solid var(--accent);border-radius:0 0 12px 12px;
-    padding:8px;position:relative;z-index:2;margin-bottom:2px}
-  .tabpanel.bare{padding:4px}
-  .subtabs{display:flex;gap:6px;margin:0}
-  .subtabs button{flex:1;padding:9px 8px;border-radius:9px;background:#1a1310;border-color:#4a3a2a}
-  .subtabs button.on{border-color:var(--accent);color:var(--accent2);background:#2a1f14}
-  .subtabs button.on[data-k="day"]{background:linear-gradient(90deg,#e8863c33,#ffb06622);border-color:var(--accent);color:var(--accent2)}
-  .subtabs button.on[data-k="night"]{background:linear-gradient(90deg,#6f8cff22,#6f8cff11);border-color:var(--night);color:#a9bcff}
-
-  .banner{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius);padding:14px 16px;margin-bottom:14px}
-  .banner .art{font-size:40px;line-height:1}
-  .banner .txt b{font-size:16px}
-  .banner .txt div{color:var(--dim);font-size:13px;margin-top:2px}
-  .banner .count{margin-left:auto;text-align:right}
-  .banner .count b{color:var(--accent2);font-size:18px;font-variant-numeric:tabular-nums}
-  .banner .count div{color:var(--dim);font-size:12px}
-
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;align-items:stretch}
   .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
     display:flex;flex-direction:column;position:relative;transition:border-color .15s,opacity .15s}
@@ -233,20 +243,23 @@
 <body>
 <header><div class="hwrap">
   <div class="htop">
-    <h1>🔥 Burning Man 2026 · <span>Inventory</span></h1>
-    <span class="cloud" id="cloud">…</span>
-    <span id="userbox"></span>
-    <span id="layoutbox"></span>
+    <h1>🔥 <b>BM 2026</b><span> · Inventory</span></h1>
+    <span class="dot" id="cloud" title="…"></span>
     <span class="spacer"></span>
-    <button class="editbtn" id="editbtn" onclick="toggleMode()">✏️ Edit</button>
+    <span id="layoutbox"></span>
+    <span id="userbox"></span>
+    <button class="editbtn" id="editbtn" onclick="toggleMode()">Edit</button>
+    <button class="collapse" id="collapsebtn" onclick="toggleNav()" title="Show or hide sections">▾</button>
   </div>
   <div id="tools"></div>
   <nav class="sections" id="nav"></nav>
-  <div id="sub"></div>
+  <div class="folder">
+    <div id="sub"></div>
+    <div id="summary"></div>
+  </div>
 </div></header>
 
 <div class="wrap">
-  <div class="banner" id="banner"></div>
   <div class="grid" id="grid"></div>
 </div>
 
@@ -446,10 +459,10 @@ async function delItem(id){
   render();
 }
 function setCloud(on,err){
-  const el=document.getElementById('cloud');
-  if(on){ el.textContent='☁ Cloud: connected'; el.className='cloud on'; }
-  else if(CLOUD){ el.textContent='⚠ Cloud unavailable'; el.className='cloud off'; el.title=err||''; }
-  else{ el.textContent='📱 Local (this device only)'; el.className='cloud off'; }
+  const el=document.getElementById('cloud'); if(!el) return;
+  el.className='dot'+(on?'':' off');
+  el.title = on ? 'Cloud connected — everyone sees your changes'
+        : (CLOUD ? ('Cloud unavailable'+(err?': '+String(err).slice(0,80):'')) : 'Local to this device');
 }
 
 /* ---------- helpers ---------- */
@@ -467,6 +480,12 @@ function currentItems(){
 }
 
 /* ---------- mode ---------- */
+function toggleNav(){
+  const c=!document.body.classList.contains('navcollapsed');
+  document.body.classList.toggle('navcollapsed',c);
+  try{ localStorage.setItem('bm-nav', c?'closed':'open'); }catch(e){}
+}
+try{ if(localStorage.getItem('bm-nav')==='closed') document.body.classList.add('navcollapsed'); }catch(e){}
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
 
 /* ---------- render ---------- */
@@ -524,9 +543,9 @@ function render(){
   let title=s.lbl, art=s.art, tip=s.tip;
   if(subs){ const sb=subs.find(x=>x.key===activeSub);
     if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); } }
-  document.getElementById('banner').innerHTML=
-    `<div class="art">${art}</div><div class="txt"><b>${title}</b><div>${tip}</div></div>
-     <div class="count"><b>${bought}/${list.length}</b><div>bought · total $${sum.toFixed(0)}</div></div>`;
+  document.getElementById('summary').innerHTML=
+    `<span class="art">${art}</span><span class="ttl">${title}</span><span class="tip">${tip}</span>
+     <span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
   grid.className='grid'+(layout==='list'?' list':'')+(mode==='edit'?' editmode':'');
