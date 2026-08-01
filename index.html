@@ -834,7 +834,7 @@ let acc=0, lock=0;
 function setNav(hide){
   if(document.body.classList.contains('navhidden')===hide) return;
   document.body.classList.toggle('navhidden',hide);
-  acc=0; if(hide) lock=Date.now()+260;        // пауза нужна только когда прячем
+  acc=0; lock=Date.now()+320;                 // пауза в обе стороны: высота шапки сама двигает страницу
   setTimeout(()=>{ lastY=Math.max(0,window.scrollY||0); acc=0; },400);
 }
 function onScroll(){
