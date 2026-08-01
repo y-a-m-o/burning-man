@@ -106,14 +106,15 @@
     -webkit-mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint));
             mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
 
-  #cover{margin:10px -14px 0;height:92px;overflow:hidden;position:relative;display:flex;
-    align-items:center;justify-content:center;background:var(--subon);
-    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
-    transition:height .24s ease,opacity .2s ease,margin .24s ease,border-width .24s ease}
-  #cover img{width:100%;height:100%;object-fit:cover;display:block}
-  #cover .ph{color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-    border:1px dashed var(--line);border-radius:8px;padding:7px 16px;background:transparent}
-  body.navhidden #cover{height:0;opacity:0;margin-top:0;border-top-width:0;border-bottom-width:0}
+  /* обложка живёт фоном внутри вкладки и растворяется по краям */
+  #cover{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+    border-radius:12px 12px 0 0;transition:opacity .25s ease}
+  #cover img{width:100%;height:100%;object-fit:cover;display:block;opacity:.42;
+    -webkit-mask-image:radial-gradient(115% 130% at 50% 42%,#000 12%,rgba(0,0,0,.55) 46%,transparent 82%);
+            mask-image:radial-gradient(115% 130% at 50% 42%,#000 12%,rgba(0,0,0,.55) 46%,transparent 82%)}
+  :root[data-theme="light"] #cover img{opacity:.3}
+  #sub,#summary{position:relative;z-index:1}
+  body.navhidden #cover{opacity:0}
   #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
   #sub:not(:empty){padding:9px 0 0}
   .subtabs{display:flex;gap:3px;margin:0}
@@ -379,7 +380,7 @@
   @media(max-width:520px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
     .wrap{padding:0 10px 10px}
-    #cover{height:64px;margin:8px -10px 0}
+    #cover{border-radius:12px 12px 0 0}
     .hwrap{padding:0 10px}
     .foldertop{padding:0 10px}
     .folderbody{padding:0 10px 10px}
@@ -449,6 +450,7 @@ const SECTIONS=[
 const STATUS=[['need','need'],['maybe','maybe'],['bought','got it']];
 const STATUS_LABEL=Object.fromEntries(STATUS);
 const NEXT_STATUS={need:'maybe',maybe:'bought',bought:'need'};
+const COVER_DEFAULT="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 400' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b1d3f'/%3E%3Cstop offset='.45' stop-color='%238a3f2e'/%3E%3Cstop offset='.78' stop-color='%23d9803a'/%3E%3Cstop offset='1' stop-color='%23f0b566'/%3E%3C/linearGradient%3E%3CradialGradient id='glow' cx='.5' cy='.86' r='.55'%3E%3Cstop offset='0' stop-color='%23ffd79a' stop-opacity='.95'/%3E%3Cstop offset='1' stop-color='%23ffd79a' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='1600' height='400' fill='url(%23sky)'/%3E%3Cellipse cx='800' cy='344' rx='560' ry='150' fill='url(%23glow)'/%3E%3Cg fill='%231b1210'%3E%3Crect x='0' y='344' width='1600' height='56'/%3E%3Cpath d='M742 344 h116 l-14-64 h-88 z'/%3E%3Cpath d='M770 280 h60 v-96 h-60 z'/%3E%3Cpath d='M800 184 m-16 0 a16 16 0 1 0 32 0 a16 16 0 1 0 -32 0'/%3E%3Cpath d='M784 214 L708 150 l14-16 l70 60 z'/%3E%3Cpath d='M816 214 L892 150 l-14-16 l-70 60 z'/%3E%3Cpath d='M756 344 l-10-38 h-16 l10 38 z'/%3E%3Cpath d='M844 344 l10-38 h16 l-10 38 z'/%3E%3C/g%3E%3Cg fill='%232a1c17' opacity='.85'%3E%3Cpath d='M300 344 l8-26 h6 l8 26 z'/%3E%3Cpath d='M1290 344 l7-22 h6 l7 22 z'/%3E%3Cpath d='M1120 344 q14-30 28 0 z'/%3E%3Cpath d='M470 344 q16-24 32 0 z'/%3E%3C/g%3E%3Cg stroke='%23ffd79a' stroke-opacity='.5' stroke-width='2' fill='none'%3E%3Cpath d='M742 300 h116'/%3E%3Cpath d='M754 262 h92'/%3E%3C/g%3E%3C/svg%3E";
 const secOf=k=>SECTIONS.find(x=>x.key===k);
 const subOf=s=>(s&&s.subs)?s.subs:null;
 
@@ -732,9 +734,7 @@ function render(){
   }
 
   const cov=document.getElementById('cover');
-  if(cov) cov.innerHTML = s.cover
-    ? `<img src="${s.cover}" alt="">`
-    : `<span class="ph">${s.lbl} — cover image</span>`;
+  if(cov) cov.innerHTML = `<img src="${s.cover||COVER_DEFAULT}" alt="">`;
 
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
