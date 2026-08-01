@@ -106,19 +106,16 @@
     -webkit-mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint));
             mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
 
-  /* обложка живёт фоном внутри вкладки и растворяется по краям */
-  #cover{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
-    border-radius:12px 12px 0 0;transition:opacity .25s ease}
-  #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 64%;display:block;opacity:.62}
-  :root[data-theme="light"] #cover img{opacity:.5}
-  /* растворение в цвет панели со всех сторон */
-  #cover::after{content:"";position:absolute;inset:0;pointer-events:none;background:
-    linear-gradient(to bottom,var(--folder) 0%,transparent 34%,transparent 58%,var(--folder) 100%),
-    linear-gradient(to right,var(--folder) 0%,transparent 20%,transparent 80%,var(--folder) 100%)}
-  #sub,#summary{position:relative;z-index:1}
-  body.navhidden #cover{opacity:0}
+  /* обложка — своя полоса между разделами и подразделами */
+  #cover{position:relative;height:104px;margin:6px -14px 2px;overflow:hidden;pointer-events:none;
+    transition:height .24s ease,opacity .2s ease,margin .24s ease}
+  #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 58%;display:block}
+  #cover::after{content:"";position:absolute;inset:0;background:
+    linear-gradient(to bottom,var(--folder) 0%,transparent 20%,transparent 80%,var(--folder) 100%),
+    linear-gradient(to right,var(--folder) 0%,transparent 11%,transparent 89%,var(--folder) 100%)}
+  body.navhidden #cover{height:0;opacity:0;margin:0}
   #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
-  #sub:not(:empty){padding:9px 0 0}
+  #sub:not(:empty){padding:12px 0 0}
   .subtabs{display:flex;gap:3px;margin:0}
   .subtabs button{flex:1 1 0;padding:6px 12px;border:0;border-radius:8px;background:transparent;
     color:var(--dim);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;
@@ -382,7 +379,7 @@
   @media(max-width:520px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
     .wrap{padding:0 10px 10px}
-    #cover{border-radius:12px 12px 0 0}
+    #cover{height:78px;margin:6px -10px 2px}
     .hwrap{padding:0 10px}
     .foldertop{padding:0 10px}
     .folderbody{padding:0 10px 10px}

@@ -109,10 +109,12 @@
   /* обложка живёт фоном внутри вкладки и растворяется по краям */
   #cover{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
     border-radius:12px 12px 0 0;transition:opacity .25s ease}
-  #cover img{width:100%;height:100%;object-fit:cover;display:block;opacity:.42;
-    -webkit-mask-image:radial-gradient(115% 130% at 50% 42%,#000 12%,rgba(0,0,0,.55) 46%,transparent 82%);
-            mask-image:radial-gradient(115% 130% at 50% 42%,#000 12%,rgba(0,0,0,.55) 46%,transparent 82%)}
-  :root[data-theme="light"] #cover img{opacity:.3}
+  #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 64%;display:block;opacity:.62}
+  :root[data-theme="light"] #cover img{opacity:.5}
+  /* растворение в цвет панели со всех сторон */
+  #cover::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+    linear-gradient(to bottom,var(--folder) 0%,transparent 34%,transparent 58%,var(--folder) 100%),
+    linear-gradient(to right,var(--folder) 0%,transparent 20%,transparent 80%,var(--folder) 100%)}
   #sub,#summary{position:relative;z-index:1}
   body.navhidden #cover{opacity:0}
   #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
