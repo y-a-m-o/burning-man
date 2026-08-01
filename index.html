@@ -1126,15 +1126,15 @@ function viewCard(it){
 
 function moveOptions(it){
   let out='';
-  SECTIONS.forEach(s=>{
+  SECTIONS.filter(x=>!x.dash).forEach(s=>{
     const subs=subOf(s);
     if(!subs){
       const v=s.key+'|';
-      out+=`<option value="${v}" ${it.section===s.key&&!it.sub?'selected':''}>→ ${s.lbl}</option>`;
+      out+=`<option value="${v}" ${it.section===s.key&&!it.sub?'selected':''}>→ ${lblOf(s)}</option>`;
     }else subs.forEach(sb=>{
       const v=s.key+'|'+sb.key;
       const sel=(it.section===s.key&&it.sub===sb.key)?'selected':'';
-      out+=`<option value="${v}" ${sel}>→ ${s.lbl} · ${sb.lbl.replace(/^\S+\s/,'')}</option>`;
+      out+=`<option value="${v}" ${sel}>→ ${lblOf(s)} · ${lblOf(sb)}</option>`;
     });
   });
   return out;
