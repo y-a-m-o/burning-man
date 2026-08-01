@@ -29,11 +29,27 @@
   .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--good);
     box-shadow:0 0 7px var(--good);transition:.2s}
   .dot.off{background:var(--warn);box-shadow:0 0 7px var(--warn)}
-  .editbtn{background:var(--accent);border-color:var(--accent);color:#1a0f06;font-weight:600;
-    padding:7px 15px;font-size:13px;flex:0 0 auto}
-  .editbtn.on{background:var(--good);border-color:var(--good)}
+  .editbtn{background:transparent;border:1px solid var(--accent);color:var(--accent2);font-weight:600;
+    padding:6px 16px;font-size:13px;flex:0 0 auto;letter-spacing:.02em;border-radius:9px}
+  .editbtn:hover{background:#2a1f14;color:var(--accent2)}
+  .editbtn.on{background:var(--good);border-color:var(--good);color:#0d1a10}
+  .editbtn.on:hover{background:var(--good);color:#0d1a10}
+  .iconbtn{background:transparent;border:1px solid #3a2f24;color:var(--dim);padding:6px 10px;
+    font-size:15px;line-height:1;border-radius:9px;flex:0 0 auto}
+  .iconbtn:hover{color:var(--text);border-color:#5a4938}
+  .menuwrap{position:relative;flex:0 0 auto}
+  .menu{position:absolute;right:0;top:calc(100% + 8px);min-width:196px;z-index:60;display:none;
+    background:#221b14;border:1px solid #3d3126;border-radius:12px;padding:6px;
+    box-shadow:0 16px 40px #000a}
+  .menu.open{display:block}
+  .menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;
+    border:0;border-radius:8px;padding:9px 10px;font-size:13.5px;color:var(--text)}
+  .menu button:hover{background:#2e2419;color:var(--accent2)}
+  .menu .sep{height:1px;background:#3d3126;margin:6px 4px}
+  .menu .who{padding:8px 10px 4px;font-size:11.5px;color:var(--dim);letter-spacing:.03em}
+  .menu .who b{color:var(--accent2);font-weight:600}
+  .menu button .k{width:18px;text-align:center;opacity:.75;font-size:14px}
   .collapse{flex:0 0 auto;padding:6px 9px;font-size:11px;color:var(--dim);line-height:1;transition:transform .2s}
-  #userbox button{padding:6px 10px;font-size:12px}
   #layoutbox .viewtoggle button{padding:6px 9px;font-size:12px}
 
   /* ---- папка раздела ---- */
@@ -86,14 +102,15 @@
   .subtabs button.on[data-k="night"]{border-color:var(--night);color:#a9bcff;background:#1b1f33}
 
   /* ---- сводка ---- */
-  #summary{display:flex;align-items:center;gap:10px;padding:12px 2px 11px;min-width:0}
+  #summary{display:flex;align-items:center;gap:10px;padding:13px 2px;min-width:0;
+    border-bottom:1px solid var(--hair)}
   #summary .art{font-size:17px;line-height:1;flex:0 0 auto}
-  #summary .ttl{font-size:15px;font-weight:600;white-space:nowrap;display:none}
+  #summary .ttl{font-size:15px;font-weight:600;white-space:nowrap;display:none;letter-spacing:.01em}
   body.navhidden #summary .ttl{display:inline}
   body.navhidden #summary .tip{display:none}
   #summary .tip{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
-  #summary .nums{margin-left:auto;flex:0 0 auto;font-size:13px;color:var(--dim);white-space:nowrap}
-  #summary .nums b{color:var(--accent2);font-size:15px;font-variant-numeric:tabular-nums}
+  #summary .nums{margin-left:auto;flex:0 0 auto;font-size:12.5px;color:var(--dim);white-space:nowrap}
+  #summary .nums b{color:var(--accent2);font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums}
   @media(max-width:620px){ #summary .tip{display:none} }
   .hwrap{max-width:1280px;margin:0 auto;padding:0 16px}
   .wrap{max-width:1280px;margin:0 auto;padding:0 16px 16px}
@@ -111,7 +128,9 @@
   .card:hover{border-color:#5a4938}
   .card.done{opacity:.72}.card.done .photo{filter:grayscale(.35)}
   .card.buyable{cursor:pointer}
-  .card.dragging{opacity:.45;border-color:var(--accent)}
+  .card.dragging{opacity:.9;border-color:var(--accent);box-shadow:0 12px 28px #000a;
+    transform:scale(1.015);z-index:5;position:relative}
+  .card.shifting{transition:transform .2s cubic-bezier(.2,.8,.3,1)}
   .card.dragover{border-color:var(--accent2)}
 
   .photo{aspect-ratio:16/10;background:#0f0d0b;display:flex;align-items:center;justify-content:center;
@@ -295,10 +314,12 @@
     <span class="dot" id="cloud" title="…"></span>
     <span class="spacer"></span>
     <span id="layoutbox"></span>
-    <span id="userbox"></span>
     <button class="editbtn" id="editbtn" onclick="toggleMode()">Edit</button>
+    <span class="menuwrap">
+      <button class="iconbtn" id="menubtn" onclick="toggleMenu(event)" aria-label="Menu">⋯</button>
+      <div class="menu" id="menu"></div>
+    </span>
   </div>
-  <div id="tools"></div>
   <nav class="sections" id="nav"></nav>
   <div class="foldertop">
     <div id="sub"></div>
@@ -549,15 +570,33 @@ function onScroll(){
   else if(acc<-30){ setNav(false); }
 }
 window.addEventListener('scroll',()=>{ if(!navTick){ navTick=true; requestAnimationFrame(onScroll); } },{passive:true});
+function toggleMenu(e){
+  if(e) e.stopPropagation();
+  const m=document.getElementById('menu');
+  const open=!m.classList.contains('open');
+  if(open) drawMenu();
+  m.classList.toggle('open',open);
+}
+function closeMenu(){ const m=document.getElementById('menu'); if(m) m.classList.remove('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.menuwrap')) closeMenu(); });
+function drawMenu(){
+  const m=document.getElementById('menu'); if(!m) return;
+  const acc = me()
+    ? '<div class="who">Signed in as <b>'+esc(session.name)+'</b></div>'+
+      '<button onclick="closeMenu();signOut()"><span class="k">⏻</span>Sign out</button>'
+    : '<button onclick="closeMenu();openGate(\'in\')"><span class="k">→</span>Sign in</button>';
+  m.innerHTML =
+    '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>Refresh</button>'+
+    '<button onclick="closeMenu();doExport()"><span class="k">↑</span>Export backup</button>'+
+    '<button onclick="closeMenu();doImport()"><span class="k">↓</span>Import backup</button>'+
+    '<button onclick="closeMenu();doCSV()"><span class="k">▤</span>Download CSV</button>'+
+    '<div class="sep"></div>'+acc;
+}
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
 
 /* ---------- render ---------- */
 function render(){
   document.body.classList.toggle('editing', mode==='edit');
-  const ub=document.getElementById('userbox');
-  ub.innerHTML = me()
-    ? '<span class="who">👤 <b>'+esc(session.name)+'</b> <button style="padding:2px 7px;font-size:11px;margin-left:5px" onclick="signOut()">exit</button></span>'
-    : '<button style="padding:5px 11px;font-size:12.5px" onclick="openGate(\'in\')">Sign in</button>';
   const lb=document.getElementById('layoutbox');
   lb.innerHTML='<span class="viewtoggle">'+
     '<button class="'+(layout==="cards"?"on":"")+'" title="Cards" onclick="setLayout(\'cards\')">▦</button>'+
@@ -567,16 +606,6 @@ function render(){
   eb.textContent = mode==='edit' ? '✓ Done' : '✏️ Edit';
   eb.className = 'editbtn'+(mode==='edit'?' on':'');
 
-  const tools=document.getElementById('tools');
-  tools.innerHTML = mode==='edit'
-    ? `<div class="tools">
-         <button onclick="pull(true)">↻ Refresh</button>
-         <button onclick="doExport()">Export</button>
-         <button onclick="doImport()">Import</button>
-         <button onclick="doCSV()">CSV</button>
-       </div>
-       <p class="tip">${HAS_SORT?'Drag the ⠿ handle to reorder. ':''}Tap a photo to change it.</p>`
-    : '';
 
   const nav=document.getElementById('nav'); nav.innerHTML='';
   SECTIONS.forEach(s=>{
@@ -711,25 +740,63 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- drag to reorder ---------- */
-let dragEl=null, dragId=null;
+let dragEl=null, dragId=null, dragShift=0;
+
+function flipReorder(move){
+  const cards=[...document.querySelectorAll('#grid .card')];
+  const before=new Map(cards.map(c=>[c,c.getBoundingClientRect()]));
+  move();
+  cards.forEach(c=>{
+    if(c===dragEl) return;
+    const b=before.get(c); if(!b) return;
+    const a=c.getBoundingClientRect();
+    const dx=b.left-a.left, dy=b.top-a.top;
+    if(!dx && !dy) return;
+    c.classList.remove('shifting');
+    c.style.transform='translate('+dx+'px,'+dy+'px)';
+  });
+  requestAnimationFrame(()=>{
+    cards.forEach(c=>{
+      if(c===dragEl) return;
+      c.classList.add('shifting');
+      c.style.transform='';
+    });
+  });
+}
+function followPointer(y){
+  const r=dragEl.getBoundingClientRect();
+  const restCenter=r.top - dragShift + r.height/2;   // где карточка была бы без сдвига
+  dragShift = y - restCenter;
+  dragEl.style.transform='translateY('+dragShift+'px) scale(1.02)';
+}
+
 document.addEventListener('pointerdown',e=>{
   const g=e.target.closest('[data-grip]'); if(!g||mode!=='edit') return;
   e.preventDefault();
-  dragId=g.dataset.grip; dragEl=g.closest('.card'); dragEl.classList.add('dragging');
+  dragId=g.dataset.grip; dragEl=g.closest('.card'); dragShift=0;
+  dragEl.classList.add('dragging');
   g.setPointerCapture(e.pointerId);
+  followPointer(e.clientY);
 });
 document.addEventListener('pointermove',e=>{
   if(!dragEl) return;
+  followPointer(e.clientY);
   const el=document.elementFromPoint(e.clientX,e.clientY);
   const over=el&&el.closest('.card');
   if(!over||over===dragEl||!over.dataset.id) return;
   const r=over.getBoundingClientRect();
   const after=(e.clientY-r.top)>r.height/2;
-  over.parentNode.insertBefore(dragEl, after?over.nextSibling:over);
+  flipReorder(()=>over.parentNode.insertBefore(dragEl, after?over.nextSibling:over));
+  followPointer(e.clientY);
 });
 document.addEventListener('pointerup',async()=>{
   if(!dragEl) return;
-  const el=dragEl; dragEl=null; el.classList.remove('dragging');
+  const el=dragEl; dragEl=null;
+  el.style.transition='transform .18s cubic-bezier(.2,.8,.3,1)';
+  el.style.transform='';
+  setTimeout(()=>{ el.style.transition=''; el.classList.remove('dragging'); },200);
+  document.querySelectorAll('#grid .card').forEach(c=>{ c.classList.remove('shifting'); c.style.transform=''; });
+  dragShift=0;
   const ids=[...document.querySelectorAll('#grid .card')].map(c=>c.dataset.id).filter(Boolean);
   const idx=ids.indexOf(dragId); if(idx<0) return;
   const prev=idx>0?items.find(x=>x.id===ids[idx-1]):null;
@@ -740,13 +807,13 @@ document.addEventListener('pointerup',async()=>{
   else if(p===null) val=n-1;
   else if(n===null) val=p+1;
   else if(n-p>0.0000001) val=(p+n)/2;
-  if(val===undefined){                       // редкий случай: одинаковые метки — пересчитываем всё
+  if(val===undefined){
     const base=Math.floor(Date.now()/1000);
     for(let i=0;i<ids.length;i++) await patchItem(ids[i],{sort:base+i});
   }else{
     await patchItem(dragId,{sort:val});
   }
-  items=sortItems(items); render();
+  items=sortItems(items);
 });
 
 /* ---------- photo ---------- */
