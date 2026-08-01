@@ -477,6 +477,8 @@
     font-weight:600;padding:11px;font-size:15px;margin-bottom:10px}
   .gbox .alt{width:100%;background:transparent;margin-bottom:6px}
   .gerr{color:var(--danger);font-size:12.5px;margin:0 0 10px;min-height:16px}
+  .forgot{display:block;margin:-6px 0 12px;font-size:12px;color:var(--dim);cursor:pointer;text-align:right}
+  .forgot:hover{color:var(--accent2);text-decoration:underline}
   .ghint{color:var(--dim);font-size:11.5px;line-height:1.5;margin:10px 0 0;text-align:center}
   .who{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:3px 9px;white-space:nowrap}
   .who b{color:var(--accent2);font-weight:600}
@@ -544,7 +546,7 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 const I18N={
   en:{
     inventory:'Inventory', edit:'Edit', done:'Done',
-    refresh:'Refresh', exportB:'Export backup', importB:'Import backup', csv:'Download CSV', pdf:'Print list (PDF)', pdfTitle:'Printable checklist', pdfAll:'All sections', pdfPhotos:'With photos', pdfMake:'Download PDF', pdfWait:'Building…',
+    refresh:'Refresh', exportB:'Export backup', importB:'Import backup', csv:'Download CSV', pdf:'Print list (PDF)', pdfTitle:'Printable checklist', pdfAll:'All sections', pdfPhotos:'With photos', pdfNeed:'Only what is still needed', pdfMake:'Download PDF', pdfWait:'Building…',
     signin:'Sign in', signout:'Sign out', profile:'My profile', language:'Українська',
     buying:"✓ I'm buying…", cancel:'✕ Cancel', save:'Save',
     boughtTotal:'bought · total', need:'need', maybe:'maybe', bought:'got it',
@@ -571,12 +573,12 @@ const I18N={
     browse:'Just browse', forgot:'Forgot password?', email:'Email', password:'Password',
     dname:'Display name', myProfile:'My profile', choosePhoto:'Choose photo',
     yourName:'Your name', profileHint:'Your face shows up on everything you take on.',
-    daysLeft:'days until the gate opens',
+    daysLeft:'days until the gate opens', offline:'Offline — showing the last saved copy',
     onboard:'Everything the camp needs lives here. Poke around, mark what you are buying, add what we forgot — and delete whatever seemed brilliant at 3am.'
   },
   uk:{
     inventory:'Інвентар', edit:'Редагувати', done:'Готово',
-    refresh:'Оновити', exportB:'Експорт копії', importB:'Імпорт копії', csv:'Завантажити CSV', pdf:'Список для друку (PDF)', pdfTitle:'Список для друку', pdfAll:'Усі розділи', pdfPhotos:'З фото', pdfMake:'Завантажити PDF', pdfWait:'Готую…',
+    refresh:'Оновити', exportB:'Експорт копії', importB:'Імпорт копії', csv:'Завантажити CSV', pdf:'Список для друку (PDF)', pdfTitle:'Список для друку', pdfAll:'Усі розділи', pdfPhotos:'З фото', pdfNeed:'Тільки те, що ще треба', pdfMake:'Завантажити PDF', pdfWait:'Готую…',
     signin:'Увійти', signout:'Вийти', profile:'Мій профіль', language:'English',
     buying:'✓ Я купую…', cancel:'✕ Скасувати', save:'Зберегти',
     boughtTotal:'куплено · разом', need:'треба', maybe:'можливо', bought:'є',
@@ -603,7 +605,7 @@ const I18N={
     browse:'Просто подивитись', forgot:'Забув пароль?', email:'Пошта', password:'Пароль',
     dname:'Ім’я для команди', myProfile:'Мій профіль', choosePhoto:'Обрати фото',
     yourName:'Твоє ім’я', profileHint:'Твоє фото з’являється на всьому, що ти береш на себе.',
-    daysLeft:'днів до відкриття воріт',
+    daysLeft:'днів до відкриття воріт', offline:'Офлайн — показую останню збережену копію',
     onboard:'Усе, що потрібно табору, тут. Тицяй, познач, що береш на себе, додай забуте — і видали те, що здавалося геніальним о третій ночі.'
   }
 };
@@ -621,12 +623,12 @@ const SECTIONS=[
     {key:'equipment', k:'equipment', art:'🔌', tip:''},
     {key:'bike',      k:'bike',      art:'🚲', tip:''},
   ]},
-  {key:'human',ico:'🧍', k:'body', art:'🧍', cover:'', tk:'tBody', tip:'', subs:[
+  {key:'human',ico:'🧍', k:'body', art:'🧍', cover:'./cover-body.jpg', tk:'tBody', tip:'', subs:[
     {key:'day',      k:'day',      art:'☀️', tip:''},
     {key:'night',    k:'night',    art:'🌙', tip:''},
     {key:'firstaid', k:'firstaid', art:'🩹', tip:''},
   ]},
-  {key:'food', ico:'🍉', k:'food', art:'🍉', cover:'', tk:'tFood', tip:'', subs:[
+  {key:'food', ico:'🍉', k:'food', art:'🍉', cover:'./cover-food.jpg', tk:'tFood', tip:'', subs:[
     {key:'produce',  k:'produce',  art:'🥬', tip:''},
     {key:'beverage', k:'beverage', art:'🥤', tip:''},
     {key:'alcohol',  k:'alcohol',  art:'🍸', tip:''},
@@ -753,7 +755,13 @@ async function pull(force){
       if(JSON.stringify(sorted)===JSON.stringify(items)) { await loadCounts(); return; }
       if((isTyping()||dragEl) && !force) return;
       items=sorted;
-    }catch(e){ setCloud(false,e.message); }
+      try{ localStorage.setItem(LKEY, JSON.stringify(items)); }catch(e){}
+    }catch(e){
+      setCloud(false,e.message);
+      if(!items.length){                          // офлайн: берём последний снимок
+        try{ items=sortItems(JSON.parse(localStorage.getItem(LKEY))||[]); }catch(x){}
+      }
+    }
     await loadCounts();
   }else{
     try{ items=JSON.parse(localStorage.getItem(LKEY))||[]; }catch(e){ items=[]; }
@@ -813,7 +821,7 @@ function setCloud(on,err){
   const el=document.getElementById('cloud'); if(!el) return;
   el.className='dot'+(on?'':' off');
   el.title = on ? 'Cloud connected — everyone sees your changes'
-        : (CLOUD ? ('Cloud unavailable'+(err?': '+String(err).slice(0,80):'')) : 'Local to this device');
+        : (CLOUD ? t('offline') : 'Local to this device');
 }
 
 /* ---------- helpers ---------- */
@@ -1524,7 +1532,7 @@ function gateShell(title,sub,fields,mainLabel,alts,hint){
   return `
     <div class="gate">
       <div class="gbox">
-        <div class="gcover"><img src="./cover.jpg" alt="">
+        <div class="gcover"><img src="./login.jpg" alt="">
           <span class="covttl"><i>BM40 · 2026</i><b>${t('inventory')}</b></span></div>
         <div class="gctl">
           <button type="button" onclick="gateLang()">🌐 ${t('language')}</button>
@@ -1541,7 +1549,7 @@ function gateShell(title,sub,fields,mainLabel,alts,hint){
     </div>`;
 }
 const fEmail='<label for="ge">Email</label><input id="ge" type="email" autocapitalize="none" autocomplete="email" placeholder="you@example.com">';
-const fPass=l=>'<label for="gp">Password</label><input id="gp" type="password" autocomplete="'+l+'" placeholder="at least 6 characters">';
+const fPass=(l,forgot)=>'<label for="gp">'+t('password')+'</label><input id="gp" type="password" autocomplete="'+l+'" placeholder="••••••">'+(forgot?'<a class="forgot" onclick="openGate(\'reset\')">'+t('forgot')+'</a>':'');
 const fName='<label for="gn">Display name</label><input id="gn" autocomplete="nickname" placeholder="shown next to your notes">';
 const val=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
 const setErr=t=>{const e=document.getElementById('gerr'); if(e) e.textContent=t;};
@@ -1592,10 +1600,10 @@ function openGate(tab){
   host.innerHTML=gateShell(
     signup?'Create account':'Sign in',
     signup?'Email, password, and the name your camp will see.':'Welcome back to the camp list.',
-    fEmail+fPass(signup?'new-password':'current-password')+(signup?fName:''),
+    fEmail+fPass(signup?'new-password':'current-password', !signup)+(signup?fName:''),
     signup?'Create account':'Sign in',
     '<button class="alt" onclick="openGate(\''+(signup?'in':'up')+'\')">'+(signup?'I already have an account':'Create a new account')+'</button>'+
-    (signup?'':'<button class="alt" onclick="openGate(\'reset\')">Forgot password?</button>')+
+    ''+
     '<button class="alt" onclick="closeGate()">Just browse</button>',
     signup?'No confirmation email — you are in right away.':'Notes and likes need an account. Browsing does not.');
   bindGate(async()=>{
@@ -1633,6 +1641,8 @@ function openPdf(){
         pdfScopes().map(o=>'<option value="'+o.v+'" '+(o.v===cur?'selected':'')+'>'+esc(o.label)+'</option>').join('')+
       '</select>'+
       '<label style="display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer">'+
+        '<input type="checkbox" id="pdfNeed" style="width:18px;height:18px"> '+t('pdfNeed')+'</label>'+
+      '<label style="display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer">'+
         '<input type="checkbox" id="pdfPhotos" checked style="width:18px;height:18px"> '+t('pdfPhotos')+'</label>'+
     '</div>'+
     '<div class="sfoot"><span style="flex:1"></span><button id="pdfGo" onclick="makePdf()">'+t('pdfMake')+'</button></div>'+
@@ -1653,6 +1663,7 @@ async function makePdf(){
   try{
     const scope=document.getElementById('pdfScope').value;
     const withPhotos=document.getElementById('pdfPhotos').checked;
+    const onlyNeed=document.getElementById('pdfNeed').checked;
     const L=await loadPdfLib();
     const doc=await L.PDFDocument.create();
     const font=await doc.embedFont(L.StandardFonts.Helvetica);
@@ -1676,7 +1687,7 @@ async function makePdf(){
       (sec.subs||[null]).forEach(sb=>{
         const key = sb ? sec.key+'/'+sb.key : sec.key;
         if(scope!=='all' && scope!==key && scope!==sec.key) return;
-        const list=items.filter(i=>i.section===sec.key && (!sb || i.sub===sb.key));
+        const list=items.filter(i=>i.section===sec.key && (!sb || i.sub===sb.key) && (!onlyNeed || i.status==='need'));
         if(list.length) groups.push({title: lblOf(sec)+(sb?' · '+lblOf(sb):''), list});
       });
     });
@@ -1743,6 +1754,11 @@ function doCSV(){
   dl(new Blob([csv],{type:'text/csv'}),'burning-man-2026.csv');
 }
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+
+/* ---------- офлайн: кэш оболочки ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
 
 /* ---------- start ---------- */
 pull();
