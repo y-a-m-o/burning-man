@@ -114,8 +114,11 @@
     border:1px solid var(--hair);border-radius:10px;background:var(--subon);
     transition:height .24s ease,opacity .2s ease,margin .24s ease,border-width .24s ease}
   #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block}
+  .covttl::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(62% 86% at 50% 50%,rgba(20,12,6,.62),rgba(20,12,6,.12) 72%,transparent)}
   .covttl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:2px;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.65)}
+  .covttl i,.covttl b{position:relative;z-index:1}
   .covttl i{font-style:normal;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#f6e3c8}
   .covttl b{font-size:21px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#fff}
   @media(max-width:620px){ .covttl b{font-size:17px} .covttl i{font-size:10px;letter-spacing:.28em} }
@@ -404,12 +407,15 @@
   .team .num b{color:var(--text);font-weight:600}
   .drow .pc{font-size:12px;color:var(--dim);width:64px;text-align:right;flex:0 0 auto;
     font-variant-numeric:tabular-nums}
-  .selbtn{padding:5px 12px;font-size:12.5px;border-radius:20px;border:1px solid var(--accent);
-    color:var(--accent2);background:transparent;flex:0 0 auto;font-weight:600}
-  .selbtn:hover{background:var(--tabhover)}
-  .selbtn.on{border-color:var(--line);color:var(--dim)}
-  .selbtn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-  #summary .tip.picked{color:var(--accent2)}
+  .selbtn{height:30px;padding:0 16px;font-size:13px;border-radius:20px;font-weight:600;
+    border:1px solid var(--accent);color:var(--accent2);background:transparent;flex:0 0 auto;
+    letter-spacing:.01em;transition:.16s;white-space:nowrap}
+  .selbtn:hover{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+  .selbtn.ghost{border-color:var(--line);color:var(--dim)}
+  .selbtn.ghost:hover{background:transparent;color:var(--text);border-color:var(--dim)}
+  .selbtn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);
+    box-shadow:0 3px 10px var(--shadow)}
+  .selbtn.go:hover{background:var(--accent2);border-color:var(--accent2)}
   .dhead{font-size:11px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;margin:2px 0 0}
   .dnote{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0}
   .dnote b{color:var(--accent2);font-weight:600}
@@ -959,7 +965,7 @@ function render(){
   }
 
   const cov=document.getElementById('cover');
-  if(cov) cov.innerHTML = `<img src="${s.cover||COVER_DEFAULT}" alt="">`+
+  if(cov) cov.innerHTML = `<img src="${s.cover||'./cover.jpg'}" alt="">`+
     (s.title ? `<span class="covttl"><i>Burning Man</i><b>${s.title}</b></span>` : '');
 
   const list=currentItems();
@@ -970,13 +976,11 @@ function render(){
     if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); } }
   const selBtn = !HAS_CLAIM ? ''
     : selectMode
-      ? `<button class="selbtn on" onclick="stopSelect()">Cancel</button>`
-      : `<button class="selbtn" onclick="startSelect()">☑ Select</button>`;
-  const midText = selectMode
-    ? `<span class="tip picked">${selected.size} selected — tap items, then save</span>`
-    : `<span class="ttl">${title}</span><span class="tip">${tip}</span>`;
+      ? `<button class="selbtn ghost" onclick="stopSelect()">✕ Cancel</button>`
+      : `<button class="selbtn" onclick="startSelect()">✓ I'm buying…</button>`;
+  const midText = selectMode ? '' : `<span class="ttl">${title}</span><span class="tip">${tip}</span>`;
   const rightSide = selectMode
-    ? `<button class="selbtn go" id="selsave" onclick="applySelect()">I'll buy these</button>`
+    ? `<button class="selbtn go" id="selsave" onclick="applySelect()">Save${selected.size?' · '+selected.size:''}</button>`
     : `<span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
   document.getElementById('summary').innerHTML = selBtn + midText +
     `<span style="margin-left:auto">${rightSide}</span>`;
@@ -1090,14 +1094,12 @@ document.addEventListener('change',e=>{
 document.addEventListener('click',e=>{           // перехват до всех прочих обработчиков
   if(!selectMode) return;
   const card=e.target.closest('#grid .card');
-  if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); }
+  if(!card||!card.dataset.id) return;
+  e.preventDefault(); e.stopPropagation();
+  togglePick(card.dataset.id);
 },true);
 document.addEventListener('click',e=>{
-  if(selectMode){
-    const card=e.target.closest('#grid .card');
-    if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); togglePick(card.dataset.id); }
-    return;
-  }
+  if(selectMode) return;
   const cy=e.target.closest('[data-cycle]');
   if(cy){ e.stopPropagation(); e.preventDefault();
     const it=items.find(x=>x.id===cy.dataset.cycle);
