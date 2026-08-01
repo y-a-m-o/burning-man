@@ -404,6 +404,12 @@
   .team .num b{color:var(--text);font-weight:600}
   .drow .pc{font-size:12px;color:var(--dim);width:64px;text-align:right;flex:0 0 auto;
     font-variant-numeric:tabular-nums}
+  .selbtn{padding:5px 12px;font-size:12.5px;border-radius:20px;border:1px solid var(--accent);
+    color:var(--accent2);background:transparent;flex:0 0 auto;font-weight:600}
+  .selbtn:hover{background:var(--tabhover)}
+  .selbtn.on{border-color:var(--line);color:var(--dim)}
+  .selbtn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+  #summary .tip.picked{color:var(--accent2)}
   .dhead{font-size:11px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;margin:2px 0 0}
   .dnote{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0}
   .dnote b{color:var(--accent2);font-weight:600}
@@ -794,7 +800,7 @@ function drawMenu(){
       '<button onclick="closeMenu();signOut()"><span class="k">⏻</span>Sign out</button>'
     : '<button onclick="closeMenu();openGate(\'in\')"><span class="k">→</span>Sign in</button>';
   m.innerHTML =
-    (HAS_CLAIM ? '<button onclick="closeMenu();startSelect()"><span class="k">☑</span>Select items…</button>' : '')+
+
     (me()&&HAS_PROFILES ? '<button onclick="closeMenu();openProfile()"><span class="k">☺</span>My profile</button>' : '')+
     '<div class="sep"></div>'+
     '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>Refresh</button>'+
@@ -962,9 +968,18 @@ function render(){
   let title=s.lbl, art=s.art, tip=s.tip;
   if(subs){ const sb=subs.find(x=>x.key===activeSub);
     if(sb){ art=sb.art; tip=sb.tip; title=s.lbl+' · '+sb.lbl.replace(/^\S+\s/,''); } }
-  document.getElementById('summary').innerHTML=
-    `<span class="art">${art}</span><span class="ttl">${title}</span><span class="tip">${tip}</span>
-     <span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
+  const selBtn = !HAS_CLAIM ? ''
+    : selectMode
+      ? `<button class="selbtn on" onclick="stopSelect()">Cancel</button>`
+      : `<button class="selbtn" onclick="startSelect()">☑ Select</button>`;
+  const midText = selectMode
+    ? `<span class="tip picked">${selected.size} selected — tap items, then save</span>`
+    : `<span class="ttl">${title}</span><span class="tip">${tip}</span>`;
+  const rightSide = selectMode
+    ? `<button class="selbtn go" id="selsave" onclick="applySelect()">I'll buy these</button>`
+    : `<span class="nums"><b>${bought}/${list.length}</b> bought · total <b>$${sum.toFixed(0)}</b></span>`;
+  document.getElementById('summary').innerHTML = selBtn + midText +
+    `<span style="margin-left:auto">${rightSide}</span>`;
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
   if(s.dash){ grid.className=''; renderDash(grid);
@@ -981,12 +996,7 @@ function render(){
   }
 
   if(selectMode){
-    document.getElementById('donebar').innerHTML='<div class="bulkbar">'+
-      '<span class="n">'+selected.size+' selected</span>'+
-      '<button onclick="unclaimSelected()">Clear owner</button>'+
-      '<button onclick="stopSelect()">Cancel</button>'+
-      '<button class="go" onclick="claimSelected()">I\'ll buy these</button>'+
-    '</div>';
+    document.getElementById('donebar').innerHTML='';
     document.getElementById('grid').classList.add('picking');
     return;
   }
@@ -1019,6 +1029,7 @@ function viewCard(it){
       ${HAS_COMMENTS?`<button class="cbtn${n?' has':''}" data-cmt="${it.id}" title="Notes">💬${n?' '+n:''}</button>`:''}
     </div>`;
   if(it.url) c.addEventListener('click',e=>{
+    if(selectMode) return;
     if(e.target.closest('[data-cmt]')||e.target.closest('[data-cycle]')) return;
     window.open(it.url,'_blank','noopener');
   });
@@ -1076,10 +1087,16 @@ document.addEventListener('change',e=>{
     if(t.dataset.f!=='name'&&t.dataset.f!=='url') render();
   }
 });
+document.addEventListener('click',e=>{           // перехват до всех прочих обработчиков
+  if(!selectMode) return;
+  const card=e.target.closest('#grid .card');
+  if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); }
+},true);
 document.addEventListener('click',e=>{
   if(selectMode){
     const card=e.target.closest('#grid .card');
-    if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); togglePick(card.dataset.id); return; }
+    if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); togglePick(card.dataset.id); }
+    return;
   }
   const cy=e.target.closest('[data-cycle]');
   if(cy){ e.stopPropagation(); e.preventDefault();
@@ -1225,25 +1242,25 @@ async function undoDelete(){
 /* ---------- массовый выбор: кто что покупает ---------- */
 function startSelect(){
   if(!me()){ openGate('in'); return; }
-  selectMode=true; selected.clear(); render();
+  selectMode=true;
+  selected=new Set(currentItems().filter(i=>i.claimed_by===session.user_id).map(i=>i.id));
+  render();
 }
 function stopSelect(){ selectMode=false; selected.clear(); render(); }
 function togglePick(id){
   if(selected.has(id)) selected.delete(id); else selected.add(id);
   render();
 }
-async function claimSelected(){
-  if(!me()||!selected.size) return;
-  const ids=[...selected];
-  const bar=document.querySelector('.bulkbar .n'); if(bar) bar.textContent='Saving…';
-  for(const id of ids){
-    await patchItem(id,{claimed_by:session.user_id, claimed_name:session.name});
+async function applySelect(){
+  if(!me()) return;
+  const list=currentItems();
+  const btn=document.getElementById('selsave'); if(btn) btn.textContent='Saving…';
+  for(const it of list){
+    const mine = it.claimed_by===session.user_id;
+    const pick = selected.has(it.id);
+    if(pick && !mine) await patchItem(it.id,{claimed_by:session.user_id, claimed_name:session.name});
+    else if(!pick && mine) await patchItem(it.id,{claimed_by:null, claimed_name:null});
   }
-  stopSelect();
-}
-async function unclaimSelected(){
-  if(!selected.size) return;
-  for(const id of [...selected]) await patchItem(id,{claimed_by:null, claimed_name:null});
   stopSelect();
 }
 
