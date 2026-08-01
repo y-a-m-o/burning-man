@@ -840,14 +840,14 @@ function setNav(hide){
 function onScroll(){
   const y=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
   const d=y-lastY; lastY=y; navTick=false;
+  if(Date.now()<lock){ acc=0; return; }     // пауза: после переключения страница дёргается сама
   if(y<60){ setNav(false); pinned=false; acc=0; return; }
-  if(d<0){                                  // вверх — показываем сразу
+  if(d<0){                                  // вверх — показываем быстро
     if(acc>0) acc=0;
     acc+=d;
     if(acc<-10) setNav(false);
     return;
   }
-  if(Date.now()<lock){ acc=0; return; }     // пауза нужна только для скрытия
   if(acc<0) acc=0;
   acc+=d;
   if(y>140 && acc>18){ pinned=false; setNav(true); }
