@@ -114,6 +114,11 @@
     border:1px solid var(--hair);border-radius:10px;background:var(--subon);
     transition:height .24s ease,opacity .2s ease,margin .24s ease,border-width .24s ease}
   #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block}
+  .covttl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:2px;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.65)}
+  .covttl i{font-style:normal;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#f6e3c8}
+  .covttl b{font-size:21px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#fff}
+  @media(max-width:620px){ .covttl b{font-size:17px} .covttl i{font-size:10px;letter-spacing:.28em} }
   body.navhidden #cover{height:0;opacity:0;margin:0;border-width:0}
   #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
   #sub:not(:empty){padding:12px 0 0}
@@ -187,7 +192,7 @@
   .photo .ph b{font-size:26px;opacity:.6;font-weight:400;line-height:1}
 
   /* ---- вид просмотра ---- */
-  .vbody{padding:9px 10px 8px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .vbody{padding:8px 9px 7px;display:flex;flex-direction:column;gap:5px;flex:1}
   .vmeta{margin-top:auto;display:flex;align-items:center;gap:8px}
   .vname{font-weight:600;font-size:13.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;
     -webkit-box-orient:vertical;overflow:hidden;min-height:2.6em;word-break:break-word}
@@ -202,7 +207,7 @@
   .pill.need{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 42%,transparent)}
   .pill.maybe{color:var(--maybe);border-color:color-mix(in srgb,var(--maybe) 42%,transparent)}
   .pill.bought{color:var(--good);border-color:color-mix(in srgb,var(--good) 42%,transparent)}
-  .cfoot{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding:6px 8px}
+  .cfoot{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding:5px 8px}
   .cbtn{position:relative;flex:0 0 auto;width:26px;height:26px;padding:0;border-radius:50%;
     border:1px solid var(--line);color:var(--dim);background:transparent;font-size:12px;line-height:1;
     display:inline-flex;align-items:center;justify-content:center;gap:4px;transition:.15s}
@@ -217,9 +222,9 @@
   .grip{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px;cursor:grab;letter-spacing:.08em;
     background:var(--subon);border-bottom:1px solid var(--line);color:var(--dim);font-size:12px;touch-action:none}
   .grip:active{cursor:grabbing}
-  .ebody{padding:8px;display:flex;flex-direction:column;gap:6px}
+  .ebody{padding:7px;display:flex;flex-direction:column;gap:5px}
   .ebody input,.ebody select{background:var(--field);border:1px solid var(--field-line);color:var(--text);
-    border-radius:7px;padding:6px 8px;font:inherit;font-size:13px;width:100%;min-width:0}
+    border-radius:7px;padding:5px 7px;font:inherit;font-size:12.5px;width:100%;min-width:0}
   .ebody input:focus,.ebody select:focus{outline:none;border-color:var(--accent)}
   .ename{font-weight:600}
   .rowline{display:flex;gap:5px;flex-wrap:wrap}
@@ -261,8 +266,8 @@
   .list .grip{flex:0 0 24px;width:24px;padding:0;border-bottom:0;border-right:1px solid var(--line);font-size:12px}
   /* правка в линейном виде: две компактные строки */
   .grid.list.editmode{gap:6px}
-  .grid.list.editmode .card{display:grid;align-items:center;column-gap:6px;row-gap:5px;
-    padding:7px 8px;border-radius:10px;
+  .grid.list.editmode .card{display:grid;align-items:center;column-gap:5px;row-gap:4px;
+    padding:5px 7px;border-radius:9px;
     grid-template-columns:20px 34px minmax(0,1fr) 78px 44px 104px 78px;
     grid-template-areas:"g t nm pr qt st del" "g t url url url url del"}
   .grid.list.editmode .grip{grid-area:g;width:auto;height:100%;border:0;background:transparent;
@@ -276,7 +281,7 @@
   .grid.list.editmode .price{grid-area:pr;flex:none}
   .grid.list.editmode .qty{grid-area:qt;flex:none}
   .grid.list.editmode select[data-f="status"]{grid-area:st}
-  .grid.list.editmode select[data-move]{grid-area:url;justify-self:start;width:100%}
+  .grid.list.editmode select[data-move]{grid-area:url;justify-self:start;width:100%;font-size:11.5px;padding:4px 6px;color:var(--dim)}
   .grid.list.editmode input[data-f="url"]{grid-area:url;display:none}
   .grid.list.editmode .delbtn{grid-area:del;width:100%;height:100%;padding:0;font-size:12px}
   @media(max-width:620px){
@@ -326,6 +331,27 @@
   .viewtoggle{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .viewtoggle button{border:0;border-radius:0;padding:7px 11px;font-size:13px;background:transparent;color:var(--dim)}
   .viewtoggle button.on{background:var(--subon);color:var(--accent2)}
+  /* аватарки и массовый выбор */
+  .av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+    border:1px solid var(--card-line);background:var(--subon);display:inline-block}
+  .av.ph{display:inline-flex;align-items:center;justify-content:center;font-size:10px;
+    color:var(--dim);font-weight:600}
+  .av.lg{width:34px;height:34px;font-size:13px}
+  .claim{display:inline-flex;align-items:center;gap:5px}
+  .selbox{position:absolute;top:6px;left:6px;z-index:6;width:22px;height:22px;border-radius:50%;
+    border:2px solid var(--accent);background:var(--field);display:flex;align-items:center;
+    justify-content:center;font-size:12px;color:transparent}
+  .card.picked .selbox{background:var(--accent);color:#fff}
+  .card.picked{outline:2px solid var(--accent);outline-offset:-2px}
+  .grid.picking .card{cursor:pointer}
+  .grid.list.picking .card{position:relative;padding-left:30px}
+  .grid.list.picking .selbox{top:50%;transform:translateY(-50%);left:2px}
+  .bulkbar{position:fixed;left:0;right:0;bottom:0;z-index:45;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:var(--menu);border-top:1px solid var(--menu-line);display:flex;align-items:center;gap:9px;
+    box-shadow:0 -8px 24px var(--shadow)}
+  .bulkbar .n{font-size:13.5px;font-weight:600;flex:1}
+  .bulkbar button{padding:9px 14px;font-size:13px;border-radius:9px}
+  .bulkbar .go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
   /* mission control */
   .dash{display:flex;flex-direction:column;gap:12px;padding:12px 0 4px}
   .dcount{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
@@ -342,9 +368,25 @@
   .drow:last-child{margin-bottom:0}
   .drow .nm{font-size:13.5px;min-width:104px;flex:0 0 auto}
   .drow .nm.sub{padding-left:12px;color:var(--dim);font-size:12.5px}
-  .bar{flex:1;height:7px;border-radius:20px;background:var(--subon);overflow:hidden;min-width:60px}
-  .bar i{display:block;height:100%;border-radius:20px;background:var(--good);transition:width .4s ease}
-  .bar.thin{height:5px}
+  .bar{flex:1;height:12px;border-radius:20px;background:var(--subon);overflow:hidden;min-width:60px;
+    box-shadow:inset 0 1px 2px var(--shadow)}
+  .bar i{display:block;height:100%;border-radius:20px;transition:width .5s cubic-bezier(.2,.8,.3,1),background .4s}
+  .bar.thin{height:7px;opacity:.9}
+  .ring{--pc:0;width:104px;height:104px;border-radius:50%;flex:0 0 auto;display:flex;
+    align-items:center;justify-content:center;position:relative;
+    background:conic-gradient(var(--ringc) calc(var(--pc)*1%),var(--subon) 0)}
+  .ring::after{content:'';position:absolute;inset:9px;border-radius:50%;background:var(--folder)}
+  .ring b{position:relative;z-index:1;font-size:25px;font-weight:600;font-variant-numeric:tabular-nums}
+  .dhero{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--card-line);
+    border-radius:12px;padding:14px}
+  .dhero .txt{min-width:0}
+  .dhero .txt b{font-size:15px;display:block}
+  .dhero .txt span{font-size:12.5px;color:var(--dim)}
+  .team{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hair)}
+  .team:last-child{border-bottom:0}
+  .team .who{font-size:13.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .team .num{font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .team .num b{color:var(--text);font-weight:600}
   .drow .pc{font-size:12px;color:var(--dim);width:64px;text-align:right;flex:0 0 auto;
     font-variant-numeric:tabular-nums}
   .dhead{font-size:11px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;margin:2px 0 0}
@@ -479,7 +521,9 @@ const COVER_DEFAULT="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/200
 const secOf=k=>SECTIONS.find(x=>x.key===k);
 const subOf=s=>(s&&s.subs)?s.subs:null;
 
-let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false;
+let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false, HAS_CLAIM=false, HAS_PROFILES=false;
+let PROFILES={};
+let selectMode=false, selected=new Set();
 let mode='view';
 let layout=(function(){ try{ return localStorage.getItem('bm-layout')||'cards'; }catch(e){ return 'cards'; } })();
 function setLayout(v){ layout=v; try{localStorage.setItem('bm-layout',v);}catch(e){} render(); }
@@ -583,6 +627,7 @@ async function pull(force){
       if(fresh.length){
         HAS_QTY=Object.prototype.hasOwnProperty.call(fresh[0],'qty');
         HAS_SORT=Object.prototype.hasOwnProperty.call(fresh[0],'sort');
+        HAS_CLAIM=Object.prototype.hasOwnProperty.call(fresh[0],'claimed_by');
       }
       if(!fresh.length){ await seedCloud(); return; }
       const sorted=sortItems(fresh);
@@ -598,6 +643,12 @@ async function pull(force){
   }
   render();
 }
+async function loadProfiles(){
+  if(!CLOUD) return;
+  try{ const rows=await api('profiles?select=user_id,name,avatar');
+       HAS_PROFILES=true; PROFILES={}; rows.forEach(r=>PROFILES[r.user_id]=r); }
+  catch(e){ HAS_PROFILES=false; }
+}
 async function loadCounts(){
   if(!CLOUD) return;
   try{
@@ -605,6 +656,7 @@ async function loadCounts(){
     HAS_COMMENTS=true; cCount={};
     rows.forEach(r=>{cCount[r.item_id]=(cCount[r.item_id]||0)+1;});
   }catch(e){ HAS_COMMENTS=false; }
+  await loadProfiles();
 }
 async function seedCloud(){
   const rows=seed().map((r,i)=>({...r,created_at:new Date(Date.now()+i*1000).toISOString()}));
@@ -623,6 +675,7 @@ async function addItem(it){
 async function patchItem(id,patch){
   if(!HAS_QTY && 'qty' in patch) delete patch.qty;
   if(!HAS_SORT && 'sort' in patch) delete patch.sort;
+  if(!HAS_CLAIM){ delete patch.claimed_by; delete patch.claimed_name; }
   if(!Object.keys(patch).length) return;
   dirtyUntil=Date.now()+4000;
   const it=items.find(x=>x.id===id); if(it) Object.assign(it,patch);
@@ -647,6 +700,12 @@ function setCloud(on,err){
 /* ---------- helpers ---------- */
 function money(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 function qnum(it){const n=parseInt(it.qty,10);return (isNaN(n)||n<1)?1:n;}
+function avatarHTML(uid,name,cls){
+  const p=PROFILES[uid];
+  const label=(p&&p.name)||name||'?';
+  if(p&&p.avatar) return '<img class="av '+(cls||'')+'" src="'+p.avatar+'" alt="'+esc(label)+'" title="'+esc(label)+'">';
+  return '<span class="av ph '+(cls||'')+'" title="'+esc(label)+'">'+esc(label.slice(0,1).toUpperCase())+'</span>';
+}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function curSub(){
   const subs=subOf(secOf(view.section)); if(!subs) return null;
@@ -720,6 +779,9 @@ function drawMenu(){
       '<button onclick="closeMenu();signOut()"><span class="k">⏻</span>Sign out</button>'
     : '<button onclick="closeMenu();openGate(\'in\')"><span class="k">→</span>Sign in</button>';
   m.innerHTML =
+    (HAS_CLAIM ? '<button onclick="closeMenu();startSelect()"><span class="k">☑</span>Select items…</button>' : '')+
+    (me()&&HAS_PROFILES ? '<button onclick="closeMenu();openProfile()"><span class="k">☺</span>My profile</button>' : '')+
+    '<div class="sep"></div>'+
     '<button onclick="closeMenu();pull(true)"><span class="k">↻</span>Refresh</button>'+
     '<button onclick="closeMenu();doExport()"><span class="k">↑</span>Export backup</button>'+
     '<button onclick="closeMenu();doImport()"><span class="k">↓</span>Import backup</button>'+
@@ -744,11 +806,41 @@ function daysToBurn(){
   const gate=new Date(2026,7,30);
   return Math.max(0, Math.ceil((gate-new Date())/86400000));
 }
+function barColor(pc){
+  return pc>=67 ? 'var(--good)' : (pc>=34 ? 'var(--warn)' : 'var(--danger)');
+}
+function barHTML(pc,thin){
+  return '<span class="bar'+(thin?' thin':'')+'"><i style="width:'+pc+'%;background:'+barColor(pc)+'"></i></span>';
+}
+function teamStats(real){
+  const by={};
+  real.forEach(i=>{
+    const k=i.claimed_by||'__none';
+    if(!by[k]) by[k]={uid:i.claimed_by||null,name:i.claimed_name||'Unclaimed',n:0,got:0,spent:0,left:0};
+    const t=by[k]; t.n++;
+    const v=money(i.price)*qnum(i);
+    if(i.status==='bought'){ t.got++; t.spent+=v; }
+    else if(i.status==='need'){ t.left+=v; }
+  });
+  return Object.values(by).sort((a,b)=>(b.uid?1:0)-(a.uid?1:0)||b.n-a.n);
+}
 function renderDash(host){
   const real=items.filter(i=>i.section!=='dash');
   const all=statsFor(real);
+  const days=daysToBurn();
+  const team=teamStats(real);
+  const known=Object.values(PROFILES);
   let h='<div class="dash">';
-  h+='<div class="dcount"><b>'+daysToBurn()+'</b><span>days until the gate opens · Aug 30, 2026</span></div>';
+
+  h+='<div class="dhero">'+
+     '<div class="ring" style="--pc:'+all.pc+';--ringc:'+barColor(all.pc)+'"><b>'+all.pc+'%</b></div>'+
+     '<div class="txt">'+
+       '<b>Mission readiness</b>'+
+       '<span>'+all.got+' of '+all.total+' items handled · '+fmt(all.spent)+' spent</span>'+
+       '<div style="margin-top:10px;font-size:12.5px;color:var(--dim)">BURN DAY <b style="color:var(--accent2);font-size:20px;margin-left:6px">−'+days+'</b>'+
+         '<span style="margin-left:10px;letter-spacing:.08em;text-transform:uppercase;font-size:11px">status: '+(days>0?'preparing':'on playa')+'</span></div>'+
+     '</div></div>';
+
   h+='<div class="dtiles">'+
     '<div class="dtile"><div class="k">Got it</div><div class="v">'+all.got+' / '+all.total+'</div>'+
       '<div class="s">'+all.pc+'% of the list</div></div>'+
@@ -759,25 +851,49 @@ function renderDash(host){
     '<div class="dtile"><div class="k">Maybe</div><div class="v">'+fmt(all.maybeSum)+'</div>'+
       '<div class="s">'+all.maybe+' undecided</div></div>'+
     '</div>';
+
+  h+='<p class="dhead">Team</p><div class="dsec">';
+  if(known.length){
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--hair);margin-bottom:4px">';
+    known.forEach(p=>{ h+=avatarHTML(p.user_id,p.name,'lg'); });
+    h+='</div>';
+  }
+  if(!HAS_CLAIM){
+    h+='<p class="dnote">Turn on ownership to see who is buying what.</p>';
+  }else if(team.length===1 && !team[0].uid){
+    h+='<p class="dnote">Nobody has claimed anything yet. Open the menu → <b>Select items…</b>, tick what you are buying and confirm.</p>';
+  }else{
+    team.forEach(t=>{
+      const pc=t.n?Math.round(t.got/t.n*100):0;
+      h+='<div class="team">'+
+        (t.uid?avatarHTML(t.uid,t.name):'<span class="av ph" title="Unclaimed">–</span>')+
+        '<span class="who">'+esc(t.name)+'</span>'+
+        barHTML(pc,true)+
+        '<span class="num"><b>'+t.got+'/'+t.n+'</b> · '+fmt(t.spent)+'</span>'+
+      '</div>';
+    });
+  }
+  h+='</div>';
+
   h+='<p class="dhead">Progress by section</p><div class="dsec">';
   SECTIONS.filter(x=>!x.dash).forEach(sec=>{
     const list=real.filter(i=>i.section===sec.key);
     const st=statsFor(list);
-    h+='<div class="drow"><span class="nm">'+sec.lbl+'</span>'+
-      '<span class="bar"><i style="width:'+st.pc+'%"></i></span>'+
-      '<span class="pc">'+st.got+'/'+st.total+'</span></div>';
+    h+='<div class="drow"><span class="nm">'+sec.lbl+'</span>'+barHTML(st.pc)+
+      '<span class="pc">'+st.pc+'% · '+st.got+'/'+st.total+'</span></div>';
     (sec.subs||[]).forEach(sb=>{
       const sl=list.filter(i=>i.sub===sb.key); const ss=statsFor(sl);
-      h+='<div class="drow"><span class="nm sub">'+sb.lbl.replace(/^\S+\s/,'')+'</span>'+
-        '<span class="bar thin"><i style="width:'+ss.pc+'%"></i></span>'+
+      h+='<div class="drow"><span class="nm sub">'+sb.lbl.replace(/^\S+\s/,'')+'</span>'+barHTML(ss.pc,true)+
         '<span class="pc">'+ss.got+'/'+ss.total+'</span></div>';
     });
   });
   h+='</div>';
+
   h+='<p class="dhead">Needs attention</p><div class="dsec"><p class="dnote">'+
     '<b>'+all.noPrice+'</b> items still have no price — you cannot budget what you have not priced.<br>'+
     '<b>'+all.maybe+'</b> sit in maybe. Each one is a decision you are still carrying.'+
     '</p></div>';
+
   h+='</div>';
   host.innerHTML=h;
 }
@@ -816,7 +932,8 @@ function render(){
   }
 
   const cov=document.getElementById('cover');
-  if(cov) cov.innerHTML = `<img src="${s.cover||COVER_DEFAULT}" alt="">`;
+  if(cov) cov.innerHTML = `<img src="${s.cover||COVER_DEFAULT}" alt="">`+
+    (s.dash ? `<span class="covttl"><i>Burning Man</i><b>Mission Control</b></span>` : '');
 
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
@@ -842,6 +959,16 @@ function render(){
     grid.appendChild(add);
   }
 
+  if(selectMode){
+    document.getElementById('donebar').innerHTML='<div class="bulkbar">'+
+      '<span class="n">'+selected.size+' selected</span>'+
+      '<button onclick="unclaimSelected()">Clear owner</button>'+
+      '<button onclick="stopSelect()">Cancel</button>'+
+      '<button class="go" onclick="claimSelected()">I\'ll buy these</button>'+
+    '</div>';
+    document.getElementById('grid').classList.add('picking');
+    return;
+  }
   document.getElementById('donebar').innerHTML = mode==='edit'
     ? `<div class="donebar"><button onclick="toggleMode()">✓ Done editing</button></div>` : '';
 }
@@ -854,8 +981,10 @@ function photoHTML(it){
 function viewCard(it){
   const c=document.createElement('div');
   const q=qnum(it), n=cCount[it.id]||0;
-  c.className='card'+(it.status==='bought'?' done':'')+(it.url?' buyable':'');
+  c.className='card'+(it.status==='bought'?' done':'')+(it.url&&!selectMode?' buyable':'')+(selected.has(it.id)?' picked':'');
+  c.dataset.id=it.id;
   c.innerHTML=`
+    ${selectMode?`<span class="selbox">✓</span>`:''}
     ${photoHTML(it)}
     <div class="vbody">
       <div class="vname">${esc(it.name)||'<span style="color:var(--dim)">untitled</span>'}</div>
@@ -865,6 +994,7 @@ function viewCard(it){
       </div>
     </div>
     <div class="cfoot">
+      ${it.claimed_by?avatarHTML(it.claimed_by,it.claimed_name):''}
       ${HAS_COMMENTS?`<button class="cbtn${n?' has':''}" data-cmt="${it.id}" title="Notes">💬${n?' '+n:''}</button>`:''}
     </div>`;
   if(it.url) c.addEventListener('click',e=>{
@@ -926,6 +1056,10 @@ document.addEventListener('change',e=>{
   }
 });
 document.addEventListener('click',e=>{
+  if(selectMode){
+    const card=e.target.closest('#grid .card');
+    if(card&&card.dataset.id){ e.preventDefault(); e.stopPropagation(); togglePick(card.dataset.id); return; }
+  }
   const cy=e.target.closest('[data-cycle]');
   if(cy){ e.stopPropagation(); e.preventDefault();
     const it=items.find(x=>x.id===cy.dataset.cycle);
@@ -1014,9 +1148,23 @@ document.addEventListener('pointerup',async()=>{
 });
 
 /* ---------- photo ---------- */
-let imgTarget=null;
+let imgTarget=null, avTarget=false;
 document.getElementById('fileimg').addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f||!imgTarget) return; const r=new FileReader();
+  const f=e.target.files[0]; if(!f) return;
+  if(avTarget){
+    const r2=new FileReader();
+    r2.onload=ev=>{const im=new Image();im.onload=()=>{
+      const sz=128; const cv=document.createElement('canvas'); cv.width=sz; cv.height=sz;
+      const side=Math.min(im.width,im.height);
+      cv.getContext('2d').drawImage(im,(im.width-side)/2,(im.height-side)/2,side,side,0,0,sz,sz);
+      avatarData=cv.toDataURL('image/jpeg',0.8);
+      const prev=document.getElementById('avprev');
+      if(prev) prev.innerHTML='<img class="av lg" src="'+avatarData+'" alt="">';
+      avTarget=false;
+    };im.src=ev.target.result;};
+    r2.readAsDataURL(f); e.target.value=''; return;
+  }
+  if(!imgTarget) return; const r=new FileReader();
   r.onload=ev=>{const img=new Image();img.onload=()=>{
     const max=360,sc=Math.min(1,max/Math.max(img.width,img.height));
     const cv=document.createElement('canvas');cv.width=img.width*sc;cv.height=img.height*sc;
@@ -1051,6 +1199,64 @@ async function undoDelete(){
   items.push(it); items=sortItems(items);
   if(!CLOUD) saveLocal();
   if(CLOUD) await pull(true); else render();
+}
+
+/* ---------- массовый выбор: кто что покупает ---------- */
+function startSelect(){
+  if(!me()){ openGate('in'); return; }
+  selectMode=true; selected.clear(); render();
+}
+function stopSelect(){ selectMode=false; selected.clear(); render(); }
+function togglePick(id){
+  if(selected.has(id)) selected.delete(id); else selected.add(id);
+  render();
+}
+async function claimSelected(){
+  if(!me()||!selected.size) return;
+  const ids=[...selected];
+  const bar=document.querySelector('.bulkbar .n'); if(bar) bar.textContent='Saving…';
+  for(const id of ids){
+    await patchItem(id,{claimed_by:session.user_id, claimed_name:session.name});
+  }
+  stopSelect();
+}
+async function unclaimSelected(){
+  if(!selected.size) return;
+  for(const id of [...selected]) await patchItem(id,{claimed_by:null, claimed_name:null});
+  stopSelect();
+}
+
+/* ---------- профиль: имя и аватарка ---------- */
+let avatarData=null;
+function openProfile(){
+  if(!me()) { openGate('in'); return; }
+  const p=PROFILES[session.user_id]||{};
+  avatarData=p.avatar||'';
+  const host=document.getElementById('sheet');
+  host.innerHTML='<div class="sheetbg" id="sheetbg"><div class="sheet">'+
+    '<div class="shead"><b>My profile</b><button onclick="closeSheet()">✕</button></div>'+
+    '<div class="slist" style="align-items:center;gap:14px">'+
+      '<div id="avprev" style="cursor:pointer">'+avatarHTML(session.user_id,session.name,'lg')+'</div>'+
+      '<button onclick="pickAvatar()">Choose photo</button>'+
+      '<input id="pname" placeholder="Your name" value="'+esc((p.name||session.name||''))+'" '+
+        'style="background:var(--field);border:1px solid var(--field-line);color:var(--text);'+
+        'border-radius:9px;padding:9px 11px;font:inherit;width:100%;max-width:280px">'+
+      '<p class="empty-note" style="padding:0">Your face shows up on everything you take on.</p>'+
+    '</div>'+
+    '<div class="sfoot"><span style="flex:1"></span><button onclick="saveProfile()">Save</button></div>'+
+  '</div></div>';
+  document.getElementById('sheetbg').addEventListener('click',e=>{ if(e.target.id==='sheetbg') closeSheet(); });
+  document.getElementById('avprev').onclick=pickAvatar;
+}
+function pickAvatar(){ avTarget=true; document.getElementById('fileimg').click(); }
+async function saveProfile(){
+  const nm=(document.getElementById('pname').value||'').trim()||session.name;
+  try{
+    await api('profiles',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=representation'},
+      body:JSON.stringify([{user_id:session.user_id,name:nm,avatar:avatarData||'',updated_at:new Date().toISOString()}])});
+    session.name=nm; saveSession(session);
+    await loadProfiles(); closeSheet(); render();
+  }catch(e){ alert('Could not save the profile'); }
 }
 
 /* ---------- comments ---------- */
