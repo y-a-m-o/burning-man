@@ -122,6 +122,39 @@
   .donebar button{background:var(--good);border-color:var(--good);color:#0d1a10;font-weight:600;
     padding:12px 30px;font-size:15px;border-radius:12px;box-shadow:0 8px 24px #0009}
 
+
+  /* ---- вид списком ---- */
+  .grid.list{grid-template-columns:1fr;gap:7px}
+  .list .card{flex-direction:row;align-items:stretch;min-height:0}
+  .list .photo{flex:0 0 76px;width:76px;aspect-ratio:4/3;border-bottom:0;border-right:1px solid var(--line)}
+  .list .photo .ph b{font-size:18px}
+  .list .photo .ph{font-size:10px}
+  .list .vbody{flex:1;min-width:0;padding:7px 10px;gap:4px;justify-content:center}
+  .list .vname{min-height:0;-webkit-line-clamp:2;font-size:14px}
+  .list .vrow{margin-top:0}
+  .list .pill{margin-left:0}
+  .list .cfoot{flex-direction:column;justify-content:center;gap:5px;border-top:0;
+    border-left:1px solid var(--line);padding:6px 8px;flex:0 0 auto}
+  .list .cbtn{flex:0 0 auto;white-space:nowrap}
+  .list .shop{padding:0}
+  .list .qbadge{display:none}
+  .list .grip{flex:0 0 26px;width:26px;padding:0;border-bottom:0;border-right:1px solid var(--line);font-size:11px}
+  .list .ebody{flex:1;min-width:0;flex-direction:row;flex-wrap:wrap;align-items:center;gap:5px;padding:7px 8px}
+  .list .ebody .ename{flex:3 1 150px;width:auto}
+  .list .ebody .rowline{flex:0 0 auto;width:auto}
+  .list .ebody select{flex:1 1 96px;width:auto}
+  .list .ebody input[data-f="url"]{flex:2 1 130px;width:auto}
+  .list .delbtn{flex:0 0 auto;width:auto;padding:6px 12px}
+  .list .addcard{min-height:46px}
+  @media(max-width:560px){
+    .list .ebody{flex-direction:column;align-items:stretch}
+    .list .ebody .ename,.list .ebody select,.list .ebody input[data-f="url"]{flex:1 1 auto;width:100%}
+    .list .cbtn{font-size:11px;padding:4px 6px}
+  }
+
+  .viewtoggle{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .viewtoggle button{border:0;border-radius:0;padding:7px 11px;font-size:13px;background:transparent;color:var(--dim)}
+  .viewtoggle button.on{background:#2a1f14;color:var(--accent2)}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:60;display:flex;
     align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);
     border-radius:12px;padding:10px 12px 10px 14px;box-shadow:0 10px 28px #000a;max-width:92vw}
@@ -183,6 +216,7 @@
     <h1>🔥 Burning Man 2026 · <span>Inventory</span></h1>
     <span class="cloud" id="cloud">…</span>
     <span id="userbox"></span>
+    <span id="layoutbox"></span>
     <span class="spacer"></span>
     <button class="editbtn" id="editbtn" onclick="toggleMode()">✏️ Edit</button>
   </div>
@@ -235,6 +269,8 @@ const subOf=s=>(s&&s.subs)?s.subs:null;
 
 let HAS_QTY=false, HAS_SORT=false, HAS_COMMENTS=false;
 let mode='view';
+let layout=(function(){ try{ return localStorage.getItem('bm-layout')||'cards'; }catch(e){ return 'cards'; } })();
+function setLayout(v){ layout=v; try{localStorage.setItem('bm-layout',v);}catch(e){} render(); }
 let view={section:'camp', subs:{camp:'supply', human:'day', food:'produce'}};
 let items=[], cCount={};
 
@@ -420,6 +456,11 @@ function render(){
   ub.innerHTML = me()
     ? '<span class="who">👤 <b>'+esc(session.name)+'</b> <button style="padding:2px 7px;font-size:11px;margin-left:5px" onclick="signOut()">exit</button></span>'
     : '<button style="padding:5px 11px;font-size:12.5px" onclick="openGate(\'in\')">Sign in</button>';
+  const lb=document.getElementById('layoutbox');
+  lb.innerHTML='<span class="viewtoggle">'+
+    '<button class="'+(layout==="cards"?"on":"")+'" title="Cards" onclick="setLayout(\'cards\')">▦</button>'+
+    '<button class="'+(layout==="list"?"on":"")+'" title="List" onclick="setLayout(\'list\')">☰</button>'+
+    '</span>';
   const eb=document.getElementById('editbtn');
   eb.textContent = mode==='edit' ? '✓ Done' : '✏️ Edit';
   eb.className = 'editbtn'+(mode==='edit'?' on':'');
@@ -466,6 +507,7 @@ function render(){
      <div class="count"><b>${bought}/${list.length}</b><div>bought · total $${sum.toFixed(0)}</div></div>`;
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
+  grid.className='grid'+(layout==='list'?' list':'');
   list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
   if(mode==='edit'){
     const add=document.createElement('div'); add.className='addcard'; add.textContent='+ add item';
