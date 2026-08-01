@@ -1071,8 +1071,7 @@ function render(){
 
   const grid=document.getElementById('grid'); grid.innerHTML='';
   if(s.dash){ grid.className=''; renderDash(grid);
-    document.getElementById('summary').innerHTML='<span class="ttl">Mission control</span>'+
-      '<span class="tip">Where the camp stands right now</span>';
+    document.getElementById('summary').innerHTML='';
     document.getElementById('donebar').innerHTML=''; return; }
   grid.className='grid'+(layout==='list'?' list':'')+(mode==='edit'?' editmode':'');
   list.forEach(it=>grid.appendChild(mode==='edit'?editCard(it):viewCard(it)));
