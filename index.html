@@ -361,8 +361,9 @@
   .bulkbar .go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
   /* mission control */
   .dash{display:flex;flex-direction:column;gap:12px;padding:12px 0 4px}
-  .donboard{margin:0;font-size:13px;line-height:1.6;color:var(--dim);background:var(--subon);
-    border-radius:11px;padding:12px 14px}
+  #onboard:not(:empty){font-size:13px;line-height:1.6;color:var(--dim);padding:11px 2px 2px}
+  body.navhidden #onboard{display:none}
+  @media(max-width:620px){ #onboard:not(:empty){font-size:12.5px;padding:9px 2px 2px} }
   .dcount{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
     background:var(--subon);border-radius:12px;padding:14px 16px}
   .dcount b{font-size:34px;font-weight:600;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1}
@@ -456,7 +457,14 @@
 
   .gate{position:fixed;inset:0;z-index:90;background:radial-gradient(900px 500px at 50% 0,var(--bg-tint) 0,var(--bg) 60%);
     display:flex;align-items:center;justify-content:center;padding:20px}
-  .gbox{width:100%;max-width:360px;background:var(--menu);border:1px solid var(--menu-line);border-radius:16px;padding:22px}
+  .gbox{width:100%;max-width:360px;background:var(--menu);border:1px solid var(--menu-line);
+    border-radius:16px;padding:16px 20px 20px}
+  .gcover{position:relative;height:96px;border-radius:11px;overflow:hidden;margin:0 0 14px}
+  .gcover img{width:100%;height:100%;object-fit:cover;display:block}
+  .gctl{display:flex;gap:7px;justify-content:center;margin:0 0 14px}
+  .gctl button{padding:5px 12px;font-size:12px;border-radius:20px;border:1px solid var(--line);
+    color:var(--dim);background:transparent}
+  .gctl button:hover{color:var(--text);border-color:var(--accent)}
   .gbox h2{margin:0 0 4px;font-size:20px;font-weight:600}
   .gbox p.sub{margin:0 0 18px;color:var(--dim);font-size:13px}
   .gbox label{display:block;font-size:12px;color:var(--dim);margin:0 0 5px}
@@ -504,6 +512,7 @@
   <nav class="sections" id="nav"></nav>
   <div class="foldertop">
     <div id="cover"></div>
+    <div id="onboard"></div>
     <div id="sub"></div>
     <div id="summary"></div>
   </div>
@@ -540,7 +549,7 @@ const I18N={
     camp:'Camp', body:'Body', food:'Food',
     supply:'Supply', equipment:'Equipment', bike:'Bike',
     day:'Day', night:'Night', firstaid:'First aid',
-    produce:'Produce', beverage:'Beverage', alcohol:'Alcohol',
+    produce:'Produce', beverage:'Beverage', alcohol:'Delights',
     tCamp:'Welcome Home', tBody:'Body Mastering', tFood:'Life Support', tDash:'Mission Control',
     readiness:'Mission readiness', burnday:'Burn day', preparing:'preparing', onplaya:'on playa',
     handled:'handled', gotit:'Got it', spent:'Spent', tobuy:'Still to buy', undecided:'undecided',
@@ -940,7 +949,7 @@ function renderDash(host){
   const team=teamStats(real);
   const known=Object.values(PROFILES);
   let h='<div class="dash">';
-  h+='<p class="donboard">'+t('onboard')+'</p>';
+
 
   h+='<div class="dhero">'+
      '<div class="ring" style="--pc:'+all.pc+';--ringc:'+barColor(all.pc)+'"><b>'+all.pc+'%</b></div>'+
@@ -1049,6 +1058,8 @@ function render(){
     panel.appendChild(wrap);
   }
 
+  const ob=document.getElementById('onboard');
+  if(ob) ob.innerHTML = s.dash ? t('onboard') : '';
   const cov=document.getElementById('cover');
   if(cov) cov.innerHTML = `<img src="${s.cover||'./cover.jpg'}" alt="">`+
     (s.tk ? `<span class="covttl"><i>BM40 · 2026</i><b>${t(s.tk)}</b></span>` : '');
@@ -1496,10 +1507,20 @@ async function toggleLike(id){
 }
 
 /* ---------- gate: sign in / create account ---------- */
+let gateTab='in';
+function gateLang(){ toggleLang(); openGate(gateTab); }
+function gateTheme(){ cycleTheme(); openGate(gateTab); }
 function gateShell(title,sub,fields,mainLabel,alts,hint){
+  const th = currentTheme()==='light' ? '☾' : '☀';
   return `
     <div class="gate">
       <div class="gbox">
+        <div class="gcover"><img src="./cover.jpg" alt="">
+          <span class="covttl"><i>BM40 · 2026</i><b>${t('inventory')}</b></span></div>
+        <div class="gctl">
+          <button type="button" onclick="gateLang()">🌐 ${t('language')}</button>
+          <button type="button" onclick="gateTheme()">${th}</button>
+        </div>
         <h2>${title}</h2>
         <p class="sub">${sub}</p>
         ${fields}
@@ -1531,6 +1552,7 @@ function friendly(m){
   return m.slice(0,140);
 }
 function openGate(tab){
+  gateTab=tab||'in';
   const host=document.getElementById('gate');
   if(tab==='reset'){
     host.innerHTML=gateShell('Reset password','We will email you a link to set a new one.',fEmail,'Send reset link',
