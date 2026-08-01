@@ -490,13 +490,15 @@ function currentItems(){
 let lastY=0, navTick=false, pinned=false;
 function hideNav(){ if(!pinned) document.body.classList.add('navhidden'); }
 function showNav(){ document.body.classList.remove('navhidden'); pinned=true; }
+let acc=0;
 function onScroll(){
   const y=Math.max(0,window.scrollY||document.documentElement.scrollTop||0);
-  const d=y-lastY;
-  if(y<60){ document.body.classList.remove('navhidden'); pinned=false; }
-  else if(d>6){ pinned=false; document.body.classList.add('navhidden'); }
-  else if(d<-8){ document.body.classList.remove('navhidden'); }
-  lastY=y; navTick=false;
+  const d=y-lastY; lastY=y; navTick=false;
+  if(y<60){ document.body.classList.remove('navhidden'); pinned=false; acc=0; return; }
+  if((d>0&&acc<0)||(d<0&&acc>0)) acc=0;   // сменил направление — считаем заново
+  acc+=d;
+  if(acc>30){ acc=0; pinned=false; document.body.classList.add('navhidden'); }
+  else if(acc<-30){ acc=0; document.body.classList.remove('navhidden'); }
 }
 window.addEventListener('scroll',()=>{ if(!navTick){ navTick=true; requestAnimationFrame(onScroll); } },{passive:true});
 function toggleMode(){ mode = mode==='view' ? 'edit' : 'view'; render(); window.scrollTo({top:window.scrollY}); }
