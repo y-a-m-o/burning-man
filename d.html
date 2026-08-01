@@ -419,7 +419,7 @@ function render(){
   const ub=document.getElementById('userbox');
   ub.innerHTML = me()
     ? '<span class="who">👤 <b>'+esc(session.name)+'</b> <button style="padding:2px 7px;font-size:11px;margin-left:5px" onclick="signOut()">exit</button></span>'
-    : '<button style="padding:5px 11px;font-size:12.5px" onclick="openGate('in')">Sign in</button>';
+    : '<button style="padding:5px 11px;font-size:12.5px" onclick="openGate(\'in\')">Sign in</button>';
   const eb=document.getElementById('editbtn');
   eb.textContent = mode==='edit' ? '✓ Done' : '✏️ Edit';
   eb.className = 'editbtn'+(mode==='edit'?' on':'');
