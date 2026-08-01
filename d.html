@@ -106,6 +106,14 @@
     -webkit-mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint));
             mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
 
+  #cover{margin:10px -14px 0;height:92px;overflow:hidden;position:relative;display:flex;
+    align-items:center;justify-content:center;background:var(--subon);
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+    transition:height .24s ease,opacity .2s ease,margin .24s ease,border-width .24s ease}
+  #cover img{width:100%;height:100%;object-fit:cover;display:block}
+  #cover .ph{color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    border:1px dashed var(--line);border-radius:8px;padding:7px 16px;background:transparent}
+  body.navhidden #cover{height:0;opacity:0;margin-top:0;border-top-width:0;border-bottom-width:0}
   #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
   #sub:not(:empty){padding:9px 0 0}
   .subtabs{display:flex;gap:3px;margin:0}
@@ -138,14 +146,14 @@
   #summary{display:flex;align-items:center;gap:10px;padding:13px 2px;min-width:0;
     border-bottom:1px solid transparent;transition:border-color .2s ease}
   body.navhidden #summary{border-bottom-color:var(--accent)}
-  #summary .art{font-size:17px;line-height:1;flex:0 0 auto}
+  #summary .art{display:none}
   #summary .ttl{font-size:15px;font-weight:600;white-space:nowrap;display:none;letter-spacing:.01em}
   body.navhidden #summary .ttl{display:inline}
   body.navhidden #summary .tip{display:none}
   #summary .tip{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
   #summary .nums{margin-left:auto;flex:0 0 auto;font-size:12.5px;color:var(--dim);white-space:nowrap}
   #summary .nums b{color:var(--accent2);font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums}
-  @media(max-width:620px){ #summary .tip{display:none} }
+
   .hwrap{max-width:1280px;margin:0 auto;padding:0 16px}
   .wrap{max-width:1280px;margin:0 auto;padding:0 16px 16px}
   .spacer{flex:1}
@@ -371,6 +379,7 @@
   @media(max-width:520px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
     .wrap{padding:0 10px 10px}
+    #cover{height:64px;margin:8px -10px 0}
     .hwrap{padding:0 10px}
     .foldertop{padding:0 10px}
     .folderbody{padding:0 10px 10px}
@@ -394,6 +403,7 @@
   </div>
   <nav class="sections" id="nav"></nav>
   <div class="foldertop">
+    <div id="cover"></div>
     <div id="sub"></div>
     <div id="summary"></div>
   </div>
@@ -420,17 +430,17 @@ const LKEY='bm-inv-2026', NKEY='bm-user-name';
 const uid=()=>Math.random().toString(36).slice(2,10);
 
 const SECTIONS=[
-  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', tip:'Everything that stays at camp', subs:[
+  {key:'camp', ico:'⛺', lbl:'Camp', art:'⛺', cover:'', tip:'Everything that stays at camp', subs:[
     {key:'supply',    lbl:'🧰 Supply',    art:'🧰', tip:'Shade, tools, water, camp life'},
     {key:'equipment', lbl:'🔌 Equipment', art:'🔌', tip:'Big gear: generator, A/C, power, tanks'},
     {key:'bike',      lbl:'🚲 Bike',      art:'🚲', tip:'Playa-proof bike and lights'},
   ]},
-  {key:'human',ico:'🧍', lbl:'Man',  art:'🧍', tip:'What you wear and carry', subs:[
+  {key:'human',ico:'🧍', lbl:'Man',  art:'🧍', cover:'', tip:'What you wear and carry', subs:[
     {key:'day',      lbl:'☀️ Day',       art:'☀️', tip:'Heat, dust, sun — what you wear by day'},
     {key:'night',    lbl:'🌙 Night',     art:'🌙', tip:'Cold and dark — what you wear at night'},
     {key:'firstaid', lbl:'🩹 First aid', art:'🩹', tip:'Meds and first aid — no pharmacy out there'},
   ]},
-  {key:'food', ico:'🍉', lbl:'Food', art:'🍉', tip:'Groceries, drinks, bar', subs:[
+  {key:'food', ico:'🍉', lbl:'Food', art:'🍉', cover:'', tip:'Groceries, drinks, bar', subs:[
     {key:'produce',  lbl:'🥬 Produce',  art:'🥬', tip:'Fresh food and groceries for the week'},
     {key:'beverage', lbl:'🥤 Beverage', art:'🥤', tip:'Water and non-alcoholic drinks'},
     {key:'alcohol',  lbl:'🍸 Alcohol',  art:'🍸', tip:'Bar stock — cans only, no glass on playa'},
@@ -720,6 +730,11 @@ function render(){
     });
     panel.appendChild(wrap);
   }
+
+  const cov=document.getElementById('cover');
+  if(cov) cov.innerHTML = s.cover
+    ? `<img src="${s.cover}" alt="">`
+    : `<span class="ph">${s.lbl} — cover image</span>`;
 
   const list=currentItems();
   const sum=list.filter(i=>i.status!=='maybe').reduce((a,i)=>a+money(i.price)*qnum(i),0);
