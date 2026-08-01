@@ -10,7 +10,7 @@
     --bg:#0f0d0b; --bg-tint:#2a2018; --panel:#1a1613; --panel2:#221c17; --line:#3a2f24;
     --text:#f3ece2; --dim:#a89a86; --accent:#e8863c; --accent2:#ffb066;
     --good:#5fbf7a; --warn:#e8b84b; --danger:#d6604a; --night:#6f8cff; --maybe:#a982e8;
-    --folder:#1c1712; --hair:#2b241c; --subon:#2e2419;
+    --folder:#211a14; --hair:#332a20; --subon:#372b1e;
     --card:#241d16; --card-line:#33291f; --row-hover:#241d16;
     --field:#0f0d0b; --field-line:#3a2f24;
     --menu:#221b14; --menu-line:#3d3126; --menu-hover:#2e2419;
@@ -18,10 +18,10 @@
     color-scheme:dark;
   }
   :root[data-theme="light"]{
-    --bg:#f2ebe0; --bg-tint:#fff8ec; --panel:#fffaf2; --panel2:#fffaf2; --line:#ddd2c0;
+    --bg:#e9dfcd; --bg-tint:#f6ecdb; --panel:#fffdf8; --panel2:#fffdf8; --line:#ddd2c0;
     --text:#2a2118; --dim:#7d6c57; --accent:#c96a1e; --accent2:#a8541a;
     --good:#4a8055; --warn:#a06a14; --danger:#b4402f; --night:#4a5aa0; --maybe:#7350ad;
-    --folder:#fffaf2; --hair:#e6dccc; --subon:#f3e6d2;
+    --folder:#fffdf8; --hair:#e8dfd0; --subon:#f4e7d3;
     --card:#ffffff; --card-line:#e6dccc; --row-hover:#f7f0e5;
     --field:#ffffff; --field-line:#ddd2c0;
     --menu:#ffffff; --menu-line:#e0d5c3; --menu-hover:#f4ece0;
@@ -30,10 +30,10 @@
   }
   @media (prefers-color-scheme:light){
     :root:not([data-theme="dark"]){
-      --bg:#f2ebe0; --bg-tint:#fff8ec; --panel:#fffaf2; --panel2:#fffaf2; --line:#ddd2c0;
+      --bg:#e9dfcd; --bg-tint:#f6ecdb; --panel:#fffdf8; --panel2:#fffdf8; --line:#ddd2c0;
       --text:#2a2118; --dim:#7d6c57; --accent:#c96a1e; --accent2:#a8541a;
       --good:#4a8055; --warn:#a06a14; --danger:#b4402f; --night:#4a5aa0; --maybe:#7350ad;
-      --folder:#fffaf2; --hair:#e6dccc; --subon:#f3e6d2;
+      --folder:#fffdf8; --hair:#e8dfd0; --subon:#f4e7d3;
       --card:#ffffff; --card-line:#e6dccc; --row-hover:#f7f0e5;
       --field:#ffffff; --field-line:#ddd2c0;
       --menu:#ffffff; --menu-line:#e0d5c3; --menu-hover:#f4ece0;
@@ -107,7 +107,7 @@
             mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
 
   /* обложка — картинка в рамке внутри вкладки */
-  #cover{position:relative;height:116px;margin:10px 0 2px;overflow:hidden;pointer-events:none;
+  #cover{position:relative;height:116px;margin:14px 0;overflow:hidden;pointer-events:none;
     border:1px solid var(--hair);border-radius:10px;background:var(--subon);
     transition:height .24s ease,opacity .2s ease,margin .24s ease,border-width .24s ease}
   #cover img{width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block}
@@ -377,7 +377,7 @@
   @media(max-width:520px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
     .wrap{padding:0 10px 10px}
-    #cover{height:86px;margin:8px 0 2px}
+    #cover{height:86px;margin:10px 0}
     .hwrap{padding:0 10px}
     .foldertop{padding:0 10px}
     .folderbody{padding:0 10px 10px}
