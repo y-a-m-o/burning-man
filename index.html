@@ -37,31 +37,38 @@
   #layoutbox .viewtoggle button{padding:6px 9px;font-size:12px}
 
   /* ---- папка раздела ---- */
-  nav.sections{display:flex;gap:6px;margin-top:12px;max-height:78px;overflow:hidden;
-    transition:max-height .22s ease,opacity .18s ease,margin-top .22s ease}
-  nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;
-    background:transparent;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;
-    cursor:pointer;transition:.15s;position:relative;min-width:0}
-  nav.sections .stab .ico{font-size:23px;line-height:1}
-  nav.sections .stab .lbl{font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* сегментированные переключатели (в духе HIG) */
+  nav.sections{display:flex;gap:2px;margin:12px 0 0;padding:3px;background:#191308;
+    border:1px solid #3a2c1b;border-radius:12px;
+    max-height:64px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,margin .24s ease,padding .24s ease}
+  nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:7px 6px;border:0;border-radius:9px;background:transparent;cursor:pointer;
+    transition:background .18s ease,color .18s ease;min-width:0}
+  nav.sections .stab .ico{font-size:18px;line-height:1}
+  nav.sections .stab .lbl{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   nav.sections .stab:hover .lbl{color:var(--text)}
-  nav.sections .stab.active{background:var(--folder);border:1px solid var(--folder-line);
-    border-bottom-color:var(--folder);z-index:3;margin-bottom:-1px;padding-bottom:11px}
+  nav.sections .stab.active{background:#3a2a15}
   nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
 
+  #sub{max-height:70px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
+  #sub:not(:empty){padding:8px 0 0}
+  .subtabs{display:flex;gap:2px;margin:0;padding:3px;background:#191308;border:1px solid #3a2c1b;border-radius:11px}
+  .subtabs button{flex:1;padding:7px 8px;border:0;border-radius:8px;background:transparent;
+    color:var(--dim);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    transition:background .18s ease,color .18s ease}
+  .subtabs button:hover{color:var(--text)}
+  .subtabs button.on{background:#3a2a15;color:var(--accent2);font-weight:600}
+  .subtabs button.on[data-k="night"]{background:#22273f;color:#a9bcff}
   .foldertop{background:var(--folder);border:1px solid var(--folder-line);border-bottom:0;
-    border-radius:14px 14px 0 0;position:relative;z-index:2}
+    border-radius:16px 16px 0 0;position:relative;z-index:2;padding:0 14px}
   .folderbody{background:var(--folder);border:1px solid var(--folder-line);border-top:0;
-    border-radius:0 0 14px 14px;padding:10px;min-height:140px;margin-top:-1px}
+    border-radius:0 0 16px 16px;padding:0 14px 12px;min-height:140px;margin-top:-1px}
   .folderbody .grid{align-items:stretch}
-  body.navhidden nav.sections{max-height:0;opacity:0;margin-top:0}
+  body.navhidden nav.sections{max-height:0;opacity:0;margin-top:0;padding-top:0;padding-bottom:0}
   body.navhidden #sub{max-height:0;opacity:0;padding:0}
   body.navhidden .foldertop{margin-top:10px}
-  /* язычок, чтобы вернуть меню без прокрутки наверх */
-  .pull{display:none;width:100%;justify-content:center;padding:0 0 6px;background:transparent;
-    border:0;color:var(--dim);font-size:10px;line-height:1;letter-spacing:.3em;cursor:pointer}
-  body.navhidden .pull{display:flex}
-  .pull:hover{color:var(--accent2)}
+  body.navhidden nav.sections{padding:0;border-color:transparent}
+
   #sub{max-height:80px;overflow:hidden;transition:max-height .22s ease,opacity .18s ease,padding .22s ease}
   #sub:not(:empty){padding:9px 9px 0}
   .subtabs{display:flex;gap:5px;margin:0}
@@ -71,9 +78,7 @@
   .subtabs button.on[data-k="night"]{border-color:var(--night);color:#a9bcff;background:#1b1f33}
 
   /* ---- сводка ---- */
-  #summary{display:flex;align-items:center;gap:10px;padding:12px 14px;min-width:0;
-    border-top:1px solid #3b2c1b;margin-top:9px}
-  body.navhidden #summary{border-top:0;margin-top:0}
+  #summary{display:flex;align-items:center;gap:10px;padding:12px 2px 11px;min-width:0}
   #summary .art{font-size:22px;line-height:1;flex:0 0 auto}
   #summary .ttl{font-size:15px;font-weight:600;white-space:nowrap;display:none}
   body.navhidden #summary .ttl{display:inline}
@@ -171,7 +176,7 @@
   .list .cbtn{flex:0 0 auto;white-space:nowrap}
   .list .shop{padding:0}
   .list .qbadge{display:none}
-  .list .grip{flex:0 0 26px;width:26px;padding:0;border-bottom:0;border-right:1px solid var(--line);font-size:11px}
+  .list .grip{flex:0 0 24px;width:24px;padding:0;border-bottom:0;border-right:1px solid var(--line);font-size:12px}
   .list .ebody{flex:1;min-width:0;flex-direction:row;flex-wrap:wrap;align-items:center;gap:5px;padding:7px 8px}
   .list .ebody .ename{flex:3 1 150px;width:auto}
   .list .ebody .rowline{flex:0 0 auto;width:auto;flex-wrap:nowrap}
@@ -187,15 +192,35 @@
     .list .cbtn{font-size:11px;padding:4px 6px}
   }
 
-  @media(min-width:760px){
-    .grid.list:not(.editmode) .card{height:52px}
-    .list .photo,.list [data-img]{flex:0 0 44px;width:44px}
-    .list .photo .ph b{font-size:13px}
-    .list .photo .ph{font-size:0}
-    .list .vbody{flex-direction:row;align-items:center;gap:14px;padding:0 12px}
-    .list .vname{-webkit-line-clamp:1;min-height:0;flex:1;font-size:14px}
-    .list .vrow{flex:0 0 auto;gap:10px;flex-wrap:nowrap}
-    .list .cfoot{flex-direction:row;gap:8px}
+  /* список: строки таблицы, колонки выровнены */
+  .grid.list{gap:0}
+  .grid.list:not(.editmode) .card{background:transparent;border:0;border-radius:0;
+    border-bottom:1px solid #34281a;height:auto;min-height:52px;padding:6px 0;
+    display:grid;grid-template-columns:38px minmax(0,1fr) 46px 74px 78px 42px;
+    align-items:center;column-gap:12px}
+  .grid.list:not(.editmode) .card:last-of-type{border-bottom:0}
+  .grid.list:not(.editmode) .card:hover{background:#2b2116}
+  .list .photo{flex:none;width:38px;height:38px;aspect-ratio:auto;border:0;border-radius:8px;overflow:hidden}
+  .list .photo .ph b{font-size:14px;opacity:.45}
+  .list .photo .ph{font-size:0}
+  .list .vbody{display:contents}
+  .list .vname{min-height:0;-webkit-line-clamp:1;font-size:14px;font-weight:500;padding:0}
+  .list .vrow{display:contents}
+  .list .vqty{justify-self:end;font-size:12px;color:var(--dim);border:0;padding:0;background:none}
+  .list .vprice{justify-self:end;font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums}
+  .list .pill{justify-self:center;margin:0;width:100%;text-align:center;font-size:11px;padding:3px 0}
+  .list .cfoot{border:0;padding:0;justify-self:end}
+  .list .cbtn{flex:none;padding:5px 8px;border-radius:8px;font-size:12px}
+  .list .shop{display:none}
+  @media(max-width:620px){
+    .grid.list:not(.editmode) .card{grid-template-columns:34px minmax(0,1fr) 62px 66px;
+      grid-template-areas:"p n q s" "p n r c";row-gap:2px;column-gap:10px;padding:8px 0}
+    .list .photo{grid-area:p;align-self:center}
+    .list .vname{grid-area:n;-webkit-line-clamp:2}
+    .list .vqty{grid-area:q}
+    .list .vprice{grid-area:r;justify-self:end}
+    .list .pill{grid-area:s;justify-self:end;width:auto;padding:3px 9px}
+    .list .cfoot{grid-area:c;justify-self:end}
   }
   .viewtoggle{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .viewtoggle button{border:0;border-radius:0;padding:7px 11px;font-size:13px;background:transparent;color:var(--dim)}
@@ -270,7 +295,6 @@
   <div class="foldertop">
     <div id="sub"></div>
     <div id="summary"></div>
-    <button class="pull" onclick="showNav()" title="Show sections">▾▾▾</button>
   </div>
 </div></header>
 
@@ -606,14 +630,13 @@ function viewCard(it){
     <div class="vbody">
       <div class="vname">${esc(it.name)||'<span style="color:var(--dim)">untitled</span>'}</div>
       <div class="vrow">
+        <span class="vqty">${q>1?'×'+q:''}</span>
         ${it.price?`<span class="vprice">$${esc(it.price)}</span>`:'<span class="vprice" style="color:var(--dim)">—</span>'}
-        ${q>1?`<span class="vqty">×${q}</span>`:''}
         <span class="pill ${it.status}">${it.status}</span>
       </div>
     </div>
     <div class="cfoot">
-      ${HAS_COMMENTS?`<button class="cbtn${n?' has':''}" data-cmt="${it.id}">💬 ${n||'note'}</button>`:''}
-      ${it.url?'<span class="shop">open ↗</span>':''}
+      ${HAS_COMMENTS?`<button class="cbtn${n?' has':''}" data-cmt="${it.id}" title="Notes">💬${n?' '+n:''}</button>`:''}
     </div>`;
   if(it.url) c.addEventListener('click',e=>{
     if(e.target.closest('[data-cmt]')) return;
@@ -640,7 +663,7 @@ function moveOptions(it){
 function editCard(it){
   const c=document.createElement('div'); c.className='card'; c.dataset.id=it.id;
   c.innerHTML=`
-    ${HAS_SORT?`<div class="grip" data-grip="${it.id}">⠿ drag</div>`:''}
+    ${HAS_SORT?`<div class="grip" data-grip="${it.id}">⠿</div>`:''}
     <div data-img="${it.id}" style="cursor:pointer">${photoHTML(it)}</div>
     <div class="ebody">
       <input class="ename" placeholder="Item name" value="${esc(it.name)}" data-f="name" data-id="${it.id}">
