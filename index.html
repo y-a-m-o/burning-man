@@ -845,7 +845,7 @@ function onScroll(){
   if(d<0){                                  // вверх — показываем быстро
     if(acc>0) acc=0;
     acc+=d;
-    if(acc<-10) setNav(false);
+    if(d<-6 || acc<-10) setNav(false);
     return;
   }
   if(acc<0) acc=0;
