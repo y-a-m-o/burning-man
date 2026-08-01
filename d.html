@@ -10,7 +10,7 @@
     --text:#f3ece2; --dim:#a89a86; --accent:#e8863c; --accent2:#ffb066;
     --good:#5fbf7a; --warn:#e8b84b; --danger:#d6604a; --night:#6f8cff; --maybe:#a982e8;
     --radius:14px;
-    --folder:#241b12; --folder-line:#5c4527;
+    --folder:#1c1712; --hair:#2b241c; --subon:#2e2419; --joint:12px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
@@ -37,32 +37,40 @@
   #layoutbox .viewtoggle button{padding:6px 9px;font-size:12px}
 
   /* ---- папка раздела ---- */
-  /* сегментированные переключатели (в духе HIG) */
-  nav.sections{display:flex;gap:2px;margin:12px 0 0;padding:3px;background:#191308;
-    border:1px solid #3a2c1b;border-radius:12px;
-    max-height:64px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,margin .24s ease,padding .24s ease}
-  nav.sections .stab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;padding:7px 6px;border:0;border-radius:9px;background:transparent;cursor:pointer;
-    transition:background .18s ease,color .18s ease;min-width:0}
-  nav.sections .stab .ico{font-size:18px;line-height:1}
-  nav.sections .stab .lbl{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  nav.sections .stab:hover .lbl{color:var(--text)}
-  nav.sections .stab.active{background:#3a2a15}
-  nav.sections .stab.active .lbl{color:var(--accent2);font-weight:600}
+  /* ——— язычок папки, вариант «Тихий» ——— */
+  nav.sections{display:flex;align-items:flex-end;gap:0;margin:12px 0 0;
+    padding-left:calc(var(--joint) + 4px);max-height:60px;overflow:hidden;
+    transition:max-height .24s ease,opacity .2s ease,margin .24s ease}
+  nav.sections .stab{position:relative;display:flex;align-items:center;gap:7px;padding:10px 16px;
+    border:0;background:transparent;border-radius:11px 11px 0 0;cursor:pointer;color:var(--dim);
+    font-size:13px;white-space:nowrap;transition:color .18s;min-width:0}
+  nav.sections .stab .ico{font-size:15px;line-height:1}
+  nav.sections .stab .lbl{font-size:13px;color:inherit;overflow:hidden;text-overflow:ellipsis}
+  nav.sections .stab:hover{color:var(--text)}
+  nav.sections .stab.active{background:var(--folder);color:var(--accent2)}
+  nav.sections .stab.active .lbl{font-weight:600}
+  nav.sections .stab.active::before,nav.sections .stab.active::after{content:"";position:absolute;
+    bottom:0;width:var(--joint);height:var(--joint);background:var(--folder)}
+  nav.sections .stab.active::before{left:calc(var(--joint) * -1);
+    -webkit-mask:radial-gradient(circle var(--joint) at 0 0,transparent 0 var(--joint),#000 var(--joint));
+            mask:radial-gradient(circle var(--joint) at 0 0,transparent 0 var(--joint),#000 var(--joint))}
+  nav.sections .stab.active::after{right:calc(var(--joint) * -1);
+    -webkit-mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint));
+            mask:radial-gradient(circle var(--joint) at 100% 0,transparent 0 var(--joint),#000 var(--joint))}
 
-  #sub{max-height:70px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
-  #sub:not(:empty){padding:8px 0 0}
-  .subtabs{display:flex;gap:2px;margin:0;padding:3px;background:#191308;border:1px solid #3a2c1b;border-radius:11px}
-  .subtabs button{flex:1;padding:7px 8px;border:0;border-radius:8px;background:transparent;
-    color:var(--dim);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    transition:background .18s ease,color .18s ease}
+  #sub{max-height:56px;overflow:hidden;transition:max-height .24s ease,opacity .2s ease,padding .24s ease}
+  #sub:not(:empty){padding:9px 0 0}
+  .subtabs{display:flex;gap:3px;margin:0}
+  .subtabs button{flex:1;padding:6px 12px;border:0;border-radius:8px;background:transparent;
+    color:var(--dim);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;transition:background .18s ease,color .18s ease}
   .subtabs button:hover{color:var(--text)}
-  .subtabs button.on{background:#3a2a15;color:var(--accent2);font-weight:600}
-  .subtabs button.on[data-k="night"]{background:#22273f;color:#a9bcff}
-  .foldertop{background:var(--folder);border:1px solid var(--folder-line);border-bottom:0;
-    border-radius:16px 16px 0 0;position:relative;z-index:2;padding:0 14px}
-  .folderbody{background:var(--folder);border:1px solid var(--folder-line);border-top:0;
-    border-radius:0 0 16px 16px;padding:0 14px 12px;min-height:140px;margin-top:-1px}
+  .subtabs button.on{background:var(--subon);color:var(--accent2);font-weight:600}
+  .subtabs button.on[data-k="night"]{background:#232839;color:#a9bcff}
+  .foldertop{background:var(--folder);border:0;border-radius:12px 12px 0 0;
+    position:relative;z-index:2;padding:0 14px}
+  .folderbody{background:var(--folder);border:0;border-radius:0 0 12px 12px;
+    padding:0 14px 10px;min-height:140px}
   .folderbody .grid{align-items:stretch}
   body.navhidden nav.sections{max-height:0;opacity:0;margin-top:0;padding-top:0;padding-bottom:0}
   body.navhidden #sub{max-height:0;opacity:0;padding:0}
@@ -79,7 +87,7 @@
 
   /* ---- сводка ---- */
   #summary{display:flex;align-items:center;gap:10px;padding:12px 2px 11px;min-width:0}
-  #summary .art{font-size:22px;line-height:1;flex:0 0 auto}
+  #summary .art{font-size:17px;line-height:1;flex:0 0 auto}
   #summary .ttl{font-size:15px;font-weight:600;white-space:nowrap;display:none}
   body.navhidden #summary .ttl{display:inline}
   body.navhidden #summary .tip{display:none}
@@ -98,7 +106,7 @@
   .tools button{padding:6px 10px;font-size:12.5px}
   .tip{color:var(--dim);font-size:12px;margin:8px 0 0}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;align-items:stretch}
-  .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  .card{background:#241d16;border:1px solid #33291f;border-radius:11px;overflow:hidden;
     display:flex;flex-direction:column;position:relative;transition:border-color .15s,opacity .15s}
   .card:hover{border-color:#5a4938}
   .card.done{opacity:.72}.card.done .photo{filter:grayscale(.35)}
@@ -195,11 +203,11 @@
   /* список: строки таблицы, колонки выровнены */
   .grid.list{gap:0}
   .grid.list:not(.editmode) .card{background:transparent;border:0;border-radius:0;
-    border-bottom:1px solid #34281a;height:auto;min-height:52px;padding:6px 0;
+    border-bottom:1px solid var(--hair);height:auto;min-height:52px;padding:6px 0;
     display:grid;grid-template-columns:38px minmax(0,1fr) 46px 74px 78px 42px;
     align-items:center;column-gap:12px}
   .grid.list:not(.editmode) .card:last-of-type{border-bottom:0}
-  .grid.list:not(.editmode) .card:hover{background:#2b2116}
+  .grid.list:not(.editmode) .card:hover{background:#241d16}
   .list .photo{flex:none;width:38px;height:38px;aspect-ratio:auto;border:0;border-radius:8px;overflow:hidden}
   .list .photo .ph b{font-size:14px;opacity:.45}
   .list .photo .ph{font-size:0}
